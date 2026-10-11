@@ -1,0 +1,13 @@
+{
+  "name": "@helm/collector",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Runs on each monitored server under PM2. Pushes PM2 state and error log lines to the Helm hub.",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,50 @@
+# dependencies
+**/node_modules
+.pnp
+.pnp.js
+
+# next.js
+.next/
+out/
+
+# production
+/build
+apps/collector/dist/
+
+# Helm's own data: the encrypted project/backup/alert store, plus PM2 logs.
+# Never commit these — see ecosystem.config.js and apps/hub/lib/store.js.
+apps/hub/data/
+logs/*.log
+
+# testing / tooling caches
+coverage/
+.eslintcache
+
+# misc
+.DS_Store
+Thumbs.db
+*.pem
+.vscode/
+.idea/
+
+# debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# env files — keep .env.example tracked, never the rest
+.env
+.env.local
+.env*.local
+!.env.example
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# vercel (not how this is deployed, but a safe default)
+.vercel
+
+# personal planning notes, not project docs
+freelance-ops-plan.md

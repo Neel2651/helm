@@ -1,0 +1,27 @@
+{
+  "name": "helm",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Helm: one place to monitor, back up and configure every project.",
+  "license": "MIT",
+  "author": "Neel Shah",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @helm/hub",
+    "build": "npm run build -w @helm/hub",
+    "start": "npm run start -w @helm/hub",
+    "lint": "npm run lint -w @helm/hub",
+    "build:collector": "npm run build -w @helm/collector",
+    "collector": "node apps/collector/dist/index.js",
+    "collector:dev": "tsx apps/collector/index.ts",
+    "backup:decrypt": "tsx scripts/decrypt-backup.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4"
+  }
+}
