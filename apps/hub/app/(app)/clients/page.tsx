@@ -46,7 +46,7 @@ export default function ClientsPage() {
                       {projects.length === 0 ? (
                         <span className="text-muted-foreground text-sm">None</span>
                       ) : (
-                        <span className="flex flex-wrap items-center gap-3 gap-1.5">
+                        <span className="flex flex-wrap items-center gap-1.5">
                           {projects.map((p) => (
                             <Link key={p.slug} href={`/projects/${p.slug}`} className="inline-block rounded-md border border-border bg-secondary px-2 py-0.5 text-xs text-muted-foreground">{p.name}</Link>
                           ))}

@@ -238,9 +238,12 @@
   table {
     @apply w-full border-collapse text-sm;
   }
+  /* Cells stay on one line and the wrapper scrolls horizontally. Letting them wrap
+     makes every column fight for width and rows grow to different heights, which is
+     worse on a phone than scrolling. Long values are clipped with Truncate instead. */
   th,
   td {
-    @apply border-b border-border px-3.5 py-3 text-left;
+    @apply border-b border-border px-3.5 py-3 text-left whitespace-nowrap;
   }
   th {
     @apply bg-secondary text-xs font-bold tracking-wider text-muted-foreground uppercase;

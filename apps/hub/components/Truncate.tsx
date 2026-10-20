@@ -40,7 +40,7 @@ export default function Truncate({
   }, [measure, children]);
 
   const text = (
-    <span ref={ref} className={cn('block truncate', className)}>
+    <span ref={ref} className={cn('block min-w-0 truncate', className)}>
       {children}
     </span>
   );

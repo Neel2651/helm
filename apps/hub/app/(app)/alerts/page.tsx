@@ -6,6 +6,7 @@ import { timeAgo } from '../../../components/display';
 import type { AlertSeverity } from '../../../lib/types';
 import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
+import ErrorDetail from '@/components/ErrorDetail';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,7 +53,7 @@ export default async function AlertsPage({ searchParams }: AlertsPageProps) {
         </form>
       </section>
 
-      <section className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 flex flex-col gap-4 gap-3">
+      <section className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 flex flex-col gap-3">
         <div className="flex items-center gap-3 justify-between">
           <h2>Open now</h2>
           <span className="text-muted-foreground text-sm">{open.length} open</span>
@@ -63,7 +64,9 @@ export default async function AlertsPage({ searchParams }: AlertsPageProps) {
           open.map((a) => (
             <div key={a.id} className="flex justify-between gap-3 border-b border-dashed border-border py-1.5 text-sm last:border-b-0 [&>span:first-child]:text-muted-foreground items-start">
               <span className={`min-w-20 font-bold ${SEVERITY_COLOR[a.severity]}`}>{a.severity}</span>
-              <span className="grow min-w-0 whitespace-normal">{a.message}</span>
+              <span className="grow min-w-0">
+                <ErrorDetail message={a.message} title={a.severity === 'critical' ? 'Critical alert' : 'Warning'} context={`${names[a.slug] || a.slug} · ${new Date(a.openedAt).toLocaleString()}`} className="text-foreground" />
+              </span>
               <span className="text-muted-foreground text-sm whitespace-nowrap">{timeAgo(a.openedAt)}</span>
             </div>
           ))
@@ -92,7 +95,11 @@ export default async function AlertsPage({ searchParams }: AlertsPageProps) {
                 <tr key={a.id}>
                   <td className="text-muted-foreground text-sm">{new Date(a.openedAt).toLocaleString()}</td>
                   <td>{names[a.slug] ? <Link href={`/projects/${a.slug}`}>{names[a.slug]}</Link> : <span className="text-muted-foreground">{a.slug}</span>}</td>
-                  <td className="max-w-105 whitespace-normal">{a.message}</td>
+                  <td>
+                    <div className="max-w-105">
+                      <ErrorDetail message={a.message} title={a.severity === 'critical' ? 'Critical alert' : 'Warning'} context={`${names[a.slug] || a.slug} · ${new Date(a.openedAt).toLocaleString()}`} className={SEVERITY_COLOR[a.severity]} />
+                    </div>
+                  </td>
                   <td>
                     {a.resolvedAt ? (
                       <span className="text-muted-foreground text-sm">Cleared {timeAgo(a.resolvedAt)}</span>

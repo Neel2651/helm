@@ -27,7 +27,7 @@ export default function TokenButton({ slug }: { slug: string }) {
   }
 
   return (
-    <div className="flex flex-col gap-4 gap-2.5">
+    <div className="flex flex-col gap-2.5">
       <Button type="button" variant="outline" size="sm" onClick={rotate} disabled={busy}>
         {busy ? 'Working…' : token ? 'Rotate again' : 'Generate or rotate token'}
       </Button>

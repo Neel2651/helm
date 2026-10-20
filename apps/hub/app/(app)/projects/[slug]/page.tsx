@@ -72,7 +72,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
                     <span className={`dot ${c.ok ? 'dot-up' : 'dot-bad'}`} aria-hidden="true" />
                     {c.name} <span className="text-muted-foreground font-mono text-[13px] text-sm">{c.url}</span>
                   </span>
-                  <span className="font-mono text-[13px] text-muted-foreground">{c.ok ? `${c.status} · ${c.ms}ms` : c.error || c.status}</span>
+                  <Truncate className="font-mono text-[13px] text-muted-foreground">{c.ok ? `${c.status} · ${c.ms}ms` : c.error || c.status}</Truncate>
                 </div>
               ))
             )}
@@ -134,7 +134,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
                     <span className={`dot ${!r.ok ? 'dot-warn' : (r.daysLeft ?? 0) <= 14 ? 'dot-warn' : 'dot-up'}`} aria-hidden="true" />
                     {host}
                   </span>
-                  <span className="font-mono text-[13px]">{r.ok ? `${r.daysLeft} days left` : r.error}</span>
+                  <Truncate className="font-mono text-[13px]">{r.ok ? `${r.daysLeft} days left` : r.error}</Truncate>
                 </div>
               ))}
             </div>
@@ -143,7 +143,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
         </div>
       </section>
 
-      <section className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 flex flex-col gap-4 gap-3">
+      <section className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 flex flex-col gap-3">
         <div className="flex items-center gap-3 justify-between">
           <h2>Recent errors</h2>
           <span className="text-muted-foreground text-sm">{errors.length} shown</span>
@@ -162,7 +162,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
         )}
       </section>
 
-      <section className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 flex flex-col gap-4 gap-3">
+      <section className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 flex flex-col gap-3">
         <div className="flex items-center gap-3 justify-between">
           <h2>Backups</h2>
           <form action={runBackupNow.bind(null, project.slug)}>
@@ -185,7 +185,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
             {backupRuns.map((r) => (
               <div key={r.id} className="flex justify-between gap-3 border-b border-dashed border-border py-1.5 text-sm last:border-b-0 [&>span:first-child]:text-muted-foreground items-center">
                 <span className="font-mono text-[13px] text-sm">{new Date(r.startedAt).toLocaleString()} · {r.trigger}</span>
-                <span className="flex items-center gap-3 gap-2.5">
+                <span className="flex items-center gap-2.5">
                   {r.bytes ? <span className="font-mono text-[13px] text-sm text-muted-foreground">{Math.round(r.bytes / 1024)} KB</span> : null}
                   <BackupStatus status={r.status} />
                 </span>
@@ -196,13 +196,13 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
       </section>
 
       <section className="grid grid-panels gap-4">
-        <div className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 flex flex-col gap-4 gap-3">
+        <div className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 flex flex-col gap-3">
           <h2>Collector token</h2>
           <p className="text-muted-foreground text-sm">Each server running the collector uses this project&rsquo;s token. Rotating invalidates the old one.</p>
           <TokenButton slug={project.slug} />
         </div>
 
-        <div className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 flex flex-col gap-4 gap-3">
+        <div className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 flex flex-col gap-3">
           <h2>Integration keys</h2>
           <p className="text-muted-foreground text-sm">Encrypted. Only the last four characters are shown.</p>
           {(project.integrations || []).length === 0 ? (

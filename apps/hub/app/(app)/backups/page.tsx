@@ -4,6 +4,7 @@ import { driveConfigured, driveNeedsReconnect } from '../../../lib/drive';
 import { runBackupNow } from '../../actions';
 import { timeAgo } from '../../../components/display';
 import BackupStatus from '../../../components/BackupStatus';
+import ErrorDetail from '@/components/ErrorDetail';
 import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
 import Truncate from '@/components/Truncate';
@@ -97,7 +98,7 @@ export default async function BackupsPage({ searchParams }: BackupsPageProps) {
                     <td className="font-mono text-[13px] text-muted-foreground">{p.backup.cron}</td>
                     <td>
                       {last ? (
-                        <span className="flex items-center gap-3 gap-2">
+                        <span className="flex items-center gap-2">
                           <BackupStatus status={last.status} />
                           <span className="text-muted-foreground text-sm">{timeAgo(last.startedAt)}</span>
                         </span>
@@ -105,8 +106,8 @@ export default async function BackupsPage({ searchParams }: BackupsPageProps) {
                         <span className="text-muted-foreground text-sm">Never</span>
                       )}
                     </td>
-                    <td className="max-w-56 font-mono text-[13px] text-muted-foreground">
-                      <Truncate>{p.backup.driveFolder || `Backups/${p.slug}`}</Truncate>
+                    <td className="font-mono text-[13px] text-muted-foreground">
+                      <div className="max-w-56"><Truncate>{p.backup.driveFolder || `Backups/${p.slug}`}</Truncate></div>
                     </td>
                     <td className="text-right">
                       <form action={runBackupNow.bind(null, p.slug)}>
@@ -153,7 +154,11 @@ export default async function BackupsPage({ searchParams }: BackupsPageProps) {
                   <td>{r.verified ? <span className="text-up">Yes</span> : <span className="text-muted-foreground">No</span>}</td>
                   <td>
                     <BackupStatus status={r.status} />
-                    {r.error ? <div className="text-sm max-w-90 whitespace-normal text-down">{r.error}</div> : null}
+                    {r.error ? (
+                      <div className="max-w-72">
+                        <ErrorDetail message={r.error} title="Backup failed" context={`${r.slug} · ${new Date(r.startedAt).toLocaleString()}`} />
+                      </div>
+                    ) : null}
                   </td>
                 </tr>
               ))}

@@ -30,7 +30,7 @@ export default async function ClientPage({ params, searchParams }: ClientPagePro
 
       {error ? <Alert variant="error">{error}</Alert> : null}
 
-      <section className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 flex flex-col gap-4 gap-3">
+      <section className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 flex flex-col gap-3">
         <h2>Linked projects</h2>
         {projects.length === 0 ? (
           <p className="text-muted-foreground text-sm">No projects linked yet. Set this client on a project&rsquo;s General settings.</p>

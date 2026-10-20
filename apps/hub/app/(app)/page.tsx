@@ -124,7 +124,7 @@ export default function OverviewPage() {
         </section>
       )}
 
-      <section className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 flex flex-col gap-4 gap-3">
+      <section className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 flex flex-col gap-3">
         <div className="flex items-center gap-3 justify-between">
           <h2>Recent errors</h2>
           <span className="text-muted-foreground text-sm">All projects</span>
