@@ -72,7 +72,7 @@ export default function ProjectForm({ project, action, submitLabel = 'Save proje
           <Input id="name" name="name" required defaultValue={d.name || ''} placeholder="CodeDharma Web" />
         </Field>
         <Field label="Slug" htmlFor="slug" hint="Used in URLs. Lowercase letters, numbers and dashes.">
-          <Input id="slug" name="slug" defaultValue={d.slug || ''} placeholder="generated from name" className="font-mono text-[13px]" />
+          <Input id="slug" name="slug" defaultValue={d.slug || ''} placeholder="generated from name" className="font-mono text-base md:text-[13px]" />
         </Field>
         <Field label="Client" htmlFor="client_id" hint={<Link href="/clients/new">+ New client</Link>}>
           {/* Radix rejects an empty SelectItem value, so "none" stands in for "no client"
@@ -111,10 +111,10 @@ export default function ProjectForm({ project, action, submitLabel = 'Save proje
         hint="Helm checks the health endpoints every minute. The frontend and backend URLs are saved for reference only."
       >
         <Field label="Frontend URL" htmlFor="fe_url" hint="Stored only, not checked">
-          <Input id="fe_url" type="url" name="fe_url" defaultValue={d.fe_url || ''} placeholder="https://www.example.com" className="font-mono text-[13px]" />
+          <Input id="fe_url" type="url" name="fe_url" defaultValue={d.fe_url || ''} placeholder="https://www.example.com" className="font-mono text-base md:text-[13px]" />
         </Field>
         <Field label="Backend URL" htmlFor="be_url" hint="Stored only, not checked">
-          <Input id="be_url" type="url" name="be_url" defaultValue={d.be_url || ''} placeholder="https://api.example.com" className="font-mono text-[13px]" />
+          <Input id="be_url" type="url" name="be_url" defaultValue={d.be_url || ''} placeholder="https://api.example.com" className="font-mono text-base md:text-[13px]" />
         </Field>
         <Field
           label="Health endpoints (checked)"
@@ -133,22 +133,22 @@ export default function ProjectForm({ project, action, submitLabel = 'Save proje
 
       <Section title="Server and PM2" hint="Used by the collector and the deploy checks.">
         <Field label="Server host" htmlFor="server_host">
-          <Input id="server_host" name="server_host" defaultValue={d.server_host || ''} placeholder="vps-1.example.com" className="font-mono text-[13px]" />
+          <Input id="server_host" name="server_host" defaultValue={d.server_host || ''} placeholder="vps-1.example.com" className="font-mono text-base md:text-[13px]" />
         </Field>
         <Field label="PM2 process names" htmlFor="pm2" hint="Comma-separated">
-          <Input id="pm2" name="pm2" defaultValue={(d.pm2_process_names || []).join(', ')} placeholder="fifthcusp-api, fifthcusp-web" className="font-mono text-[13px]" />
+          <Input id="pm2" name="pm2" defaultValue={(d.pm2_process_names || []).join(', ')} placeholder="fifthcusp-api, fifthcusp-web" className="font-mono text-base md:text-[13px]" />
         </Field>
         <Field label="Log file paths" htmlFor="logs" wide hint="Comma-separated. The collector scans these for errors.">
-          <Input id="logs" name="logs" defaultValue={(d.log_paths || []).join(', ')} placeholder="/var/www/app/logs/error.log" className="font-mono text-[13px]" />
+          <Input id="logs" name="logs" defaultValue={(d.log_paths || []).join(', ')} placeholder="/var/www/app/logs/error.log" className="font-mono text-base md:text-[13px]" />
         </Field>
       </Section>
 
       <Section title="Git" hint="Repository this project deploys from.">
         <Field label="Repository URL" htmlFor="git_repo">
-          <Input id="git_repo" name="git_repo" defaultValue={git.repo || ''} placeholder="git@github.com:you/app.git" className="font-mono text-[13px]" />
+          <Input id="git_repo" name="git_repo" defaultValue={git.repo || ''} placeholder="git@github.com:you/app.git" className="font-mono text-base md:text-[13px]" />
         </Field>
         <Field label="Branch" htmlFor="git_branch">
-          <Input id="git_branch" name="git_branch" defaultValue={git.branch || 'main'} className="font-mono text-[13px]" />
+          <Input id="git_branch" name="git_branch" defaultValue={git.branch || 'main'} className="font-mono text-base md:text-[13px]" />
         </Field>
       </Section>
 
@@ -167,16 +167,16 @@ export default function ProjectForm({ project, action, submitLabel = 'Save proje
           </Select>
         </Field>
         <Field label="User" htmlFor="db_user">
-          <Input id="db_user" name="db_user" defaultValue={db.user || ''} placeholder="ops_readonly" className="font-mono text-[13px]" />
+          <Input id="db_user" name="db_user" defaultValue={db.user || ''} placeholder="ops_readonly" className="font-mono text-base md:text-[13px]" />
         </Field>
         <Field label="Connection string" htmlFor="db_url" wide>
-          <Input id="db_url" type="password" name="db_url" autoComplete="off" placeholder={db.url_enc ? 'Saved. Leave blank to keep.' : 'mongodb+srv://…'} className="font-mono text-[13px]" />
+          <Input id="db_url" type="password" name="db_url" autoComplete="off" placeholder={db.url_enc ? 'Saved. Leave blank to keep.' : 'mongodb+srv://…'} className="font-mono text-base md:text-[13px]" />
         </Field>
         <Field label="Password" htmlFor="db_password">
           <Input id="db_password" type="password" name="db_password" autoComplete="new-password" placeholder={db.password_enc ? 'Saved. Leave blank to keep.' : ''} />
         </Field>
         <Field label="Collections or tables" htmlFor="collections" hint="Comma-separated">
-          <Input id="collections" name="collections" defaultValue={(db.collections || []).join(', ')} placeholder="contacts, bookings" className="font-mono text-[13px]" />
+          <Input id="collections" name="collections" defaultValue={(db.collections || []).join(', ')} placeholder="contacts, bookings" className="font-mono text-base md:text-[13px]" />
         </Field>
       </Section>
 
@@ -188,7 +188,7 @@ export default function ProjectForm({ project, action, submitLabel = 'Save proje
           </Label>
         </div>
         <Field label="Schedule (cron)" htmlFor="backup_cron">
-          <Input id="backup_cron" name="backup_cron" defaultValue={backup.cron || '0 2 * * *'} className="font-mono text-[13px]" />
+          <Input id="backup_cron" name="backup_cron" defaultValue={backup.cron || '0 2 * * *'} className="font-mono text-base md:text-[13px]" />
         </Field>
         <Field
           label="Keep latest backups"
@@ -198,7 +198,7 @@ export default function ProjectForm({ project, action, submitLabel = 'Save proje
           <Input id="backup_retention" type="number" min="1" name="backup_retention" defaultValue={backup.retentionDays || 30} />
         </Field>
         <Field label="Google Drive folder" htmlFor="backup_drive_folder" wide>
-          <Input id="backup_drive_folder" name="backup_drive_folder" defaultValue={backup.driveFolder || ''} placeholder="Backups/codedharma-web" className="font-mono text-[13px]" />
+          <Input id="backup_drive_folder" name="backup_drive_folder" defaultValue={backup.driveFolder || ''} placeholder="Backups/codedharma-web" className="font-mono text-base md:text-[13px]" />
         </Field>
       </Section>
 

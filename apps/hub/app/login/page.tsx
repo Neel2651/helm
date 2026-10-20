@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import { login } from '../actions';
+import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 export const metadata: Metadata = { title: 'Sign in · Helm' };
 
@@ -8,24 +11,46 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const { error } = await searchParams;
 
   return (
-    <div className="grid min-h-dvh place-items-center p-6 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-      <div className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 flex w-full max-w-95 flex-col gap-5">
-        <div className="flex items-center gap-3">
-          <span className="brand-mark relative size-7.5 rounded-full border-[3px] border-primary" aria-hidden="true"/>
-          <h1>Sign in to Helm</h1>
+    <div className="grid min-h-dvh place-items-center bg-background px-4 py-6 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+      <main className="flex w-full max-w-sm flex-col gap-8">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <span className="relative size-11 rounded-full border-4 border-primary" aria-hidden="true">
+            <span className="absolute inset-1.5 rounded-full bg-accent" />
+          </span>
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl font-extrabold tracking-tight">Helm</h1>
+            <p className="text-sm text-muted-foreground">
+              Monitor, back up and configure every project from one place.
+            </p>
+          </div>
         </div>
-        <p className="text-muted-foreground text-sm">Private dashboard. Only the owner can sign in.</p>
 
-        {error ? <div className="rounded-lg border border-degraded-border bg-degraded-soft px-3.5 py-3 text-sm text-degraded border-down-border-soft bg-down-soft text-down" role="alert">Wrong password. Try again.</div> : null}
+        <div className="flex flex-col gap-5 rounded-xl border border-border bg-card p-6 shadow-sm">
+          {error ? <Alert variant="error">Wrong password. Try again.</Alert> : null}
 
-        <form action={login} className="form gap-3.5">
-          <label className="flex flex-col gap-1.5">
-            <span className="text-[13px] font-semibold">Password</span>
-            <input type="password" name="password" required autoFocus autoComplete="current-password" />
-          </label>
-          <Button type="submit">Sign in</Button>
-        </form>
-      </div>
+          <form action={login} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                name="password"
+                required
+                autoFocus
+                autoComplete="current-password"
+                placeholder="••••••••••••"
+              />
+            </div>
+            <Button type="submit" className="w-full">
+              Sign in
+            </Button>
+          </form>
+        </div>
+
+        <p className="text-center text-xs text-muted-foreground">
+          Private dashboard. Only the owner can sign in.
+        </p>
+      </main>
     </div>
   );
 }

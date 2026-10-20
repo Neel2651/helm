@@ -36,6 +36,12 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false },
 };
 
+// Note there is deliberately no maximum-scale / user-scalable here. The "page zooms in on
+// mobile" problem is iOS auto-zooming when a focused form control has a font smaller than
+// 16px, which is fixed where it is caused — inputs are text-base below md. Pinning the
+// scale would not fix it anyway: Safari has ignored user-scalable, minimum-scale and
+// maximum-scale on web pages since iOS 10, and it breaks pinch-zoom for anyone who needs it
+// on the browsers that still honour it.
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,

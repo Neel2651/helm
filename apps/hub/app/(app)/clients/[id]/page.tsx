@@ -5,6 +5,7 @@ import { StateBadge, timeAgo } from '../../../../components/display';
 import ClientForm from '../../../../components/ClientForm';
 import { saveClient, removeClient } from '../../../actions';
 import { Button } from '@/components/ui/button';
+import { Alert } from '@/components/ui/alert';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +28,7 @@ export default async function ClientPage({ params, searchParams }: ClientPagePro
         <h1 className="mt-1">{client.name}</h1>
       </header>
 
-      {error ? <div className="rounded-lg border border-degraded-border bg-degraded-soft px-3.5 py-3 text-sm text-degraded border-down-border-soft bg-down-soft text-down" role="alert">{error}</div> : null}
+      {error ? <Alert variant="error">{error}</Alert> : null}
 
       <section className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 flex flex-col gap-4 gap-3">
         <h2>Linked projects</h2>

@@ -15,6 +15,8 @@ import BackupStatus from '../../../../components/BackupStatus';
 import ProjectForm from '../../../../components/ProjectForm';
 import TokenButton from '../../../../components/TokenButton';
 import { saveProject, removeProject, addIntegration, removeIntegration, runBackupNow } from '../../../actions';
+import { Alert } from '@/components/ui/alert';
+import Truncate from '@/components/Truncate';
 
 export const dynamic = 'force-dynamic';
 
@@ -170,7 +172,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
             </Button>
           </form>
         </div>
-        {backupError ? <div className="rounded-lg border border-degraded-border bg-degraded-soft px-3.5 py-3 text-sm text-degraded border-down-border-soft bg-down-soft text-down" role="alert">{backupError}</div> : null}
+        {backupError ? <Alert variant="error">{backupError}</Alert> : null}
         <p className="text-muted-foreground text-sm">
           {project.backup?.enabled
             ? `Scheduled ${project.backup.cron} · keeps the latest ${project.backup.retentionDays || 30} · ${project.backup.driveFolder || `Backups/${project.slug}`}`
@@ -208,9 +210,11 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
           ) : (
             (project.integrations || []).map((i) => (
               <div key={i.id} className="flex justify-between gap-3 border-b border-dashed border-border py-1.5 text-sm last:border-b-0 [&>span:first-child]:text-muted-foreground items-center">
-                <span>
-                  <strong className="text-foreground">{i.label}</strong>
-                  <div className="font-mono text-[13px] text-sm text-muted-foreground">{i.key_name} · {maskSecret(i.value_enc)}</div>
+                <span className="grow min-w-0">
+                  <Truncate className="font-semibold text-foreground">{i.label}</Truncate>
+                  <Truncate className="font-mono text-[13px] text-muted-foreground">
+                    {i.key_name} · {maskSecret(i.value_enc)}
+                  </Truncate>
                 </span>
                 <form action={removeIntegration.bind(null, project.slug, i.id)}>
                   <Button type="submit" variant="destructive" size="sm">Remove</Button>
@@ -240,7 +244,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="key_name">Env name</Label>
-              <Input id="key_name" name="key_name" required placeholder="RAZORPAY_KEY_SECRET" className="font-mono text-[13px]" />
+              <Input id="key_name" name="key_name" required placeholder="RAZORPAY_KEY_SECRET" className="font-mono text-base md:text-[13px]" />
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="integration_value">Value</Label>

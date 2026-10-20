@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { listProjects, getAllStatus, clientNameFor } from '../../../lib/store';
 import { StateBadge, timeAgo } from '../../../components/display';
 import { Button } from '@/components/ui/button';
+import Truncate from '@/components/Truncate';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,7 +55,9 @@ export default function ProjectsPage() {
                     </td>
                     <td><StateBadge state={s?.state || 'unknown'} /></td>
                     <td className="font-mono text-[13px] text-muted-foreground">{p.fe_url || '—'}</td>
-                    <td className="font-mono text-[13px] text-muted-foreground">{p.server_host || '—'}</td>
+                    <td className="max-w-48 font-mono text-[13px] text-muted-foreground">
+                      <Truncate>{p.server_host || '—'}</Truncate>
+                    </td>
                     <td>{p.backup?.enabled ? <span className="inline-block rounded-md border border-border bg-secondary px-2 py-0.5 text-xs text-muted-foreground">{p.backup.cron}</span> : <span className="text-muted-foreground text-sm">Off</span>}</td>
                     <td className="text-muted-foreground text-sm">{timeAgo(s?.checkedAt)}</td>
                   </tr>

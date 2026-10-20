@@ -3,6 +3,7 @@ import { driveStatus, oauthClientConfigured, redirectUri } from '../../../lib/dr
 import { disconnectGoogleDrive, testGoogleDrive } from '../../actions';
 import { timeAgo } from '../../../components/display';
 import { Button } from '@/components/ui/button';
+import { Alert } from '@/components/ui/alert';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,10 +31,10 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
         </div>
       </header>
 
-      {q.google_connected ? <div className="rounded-lg border border-degraded-border bg-degraded-soft px-3.5 py-3 text-sm text-degraded border-up-border bg-up-soft text-up" role="status">Google Drive connected.</div> : null}
-      {q.google_disconnected ? <div className="rounded-lg border border-degraded-border bg-degraded-soft px-3.5 py-3 text-sm text-degraded" role="status">Google Drive disconnected.</div> : null}
-      {q.google_ok ? <div className="rounded-lg border border-degraded-border bg-degraded-soft px-3.5 py-3 text-sm text-degraded border-up-border bg-up-soft text-up" role="status">Connection works. Google issued a fresh access token.</div> : null}
-      {q.google_error ? <div className="rounded-lg border border-degraded-border bg-degraded-soft px-3.5 py-3 text-sm text-degraded border-down-border-soft bg-down-soft text-down" role="alert">{q.google_error}</div> : null}
+      {q.google_connected ? <Alert variant="success">Google Drive connected.</Alert> : null}
+      {q.google_disconnected ? <Alert variant="warning">Google Drive disconnected.</Alert> : null}
+      {q.google_ok ? <Alert variant="success">Connection works. Google issued a fresh access token.</Alert> : null}
+      {q.google_error ? <Alert variant="error">{q.google_error}</Alert> : null}
 
       <section className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-3 justify-between">
@@ -47,19 +48,19 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
         </div>
 
         {!clientReady ? (
-          <div className="rounded-lg border border-degraded-border bg-degraded-soft px-3.5 py-3 text-sm text-degraded">
+          <Alert variant="warning">
             No OAuth client yet. Set <code className="font-mono text-[13px]">HELM_GOOGLE_CLIENT_ID</code> and{' '}
             <code className="font-mono text-[13px]">HELM_GOOGLE_CLIENT_SECRET</code> on the hub, then restart it.
-          </div>
+          </Alert>
         ) : null}
 
-        {status.error ? <div className="rounded-lg border border-degraded-border bg-degraded-soft px-3.5 py-3 text-sm text-degraded border-down-border-soft bg-down-soft text-down">{status.error}</div> : null}
+        {status.error ? <Alert variant="error">{status.error}</Alert> : null}
 
         {status.usingEnvFallback ? (
-          <div className="rounded-lg border border-degraded-border bg-degraded-soft px-3.5 py-3 text-sm text-degraded">
+          <Alert variant="warning">
             Using the refresh token from <code className="font-mono text-[13px]">HELM_GOOGLE_REFRESH_TOKEN</code>. Press Connect to
             replace it with one Helm manages and renews itself.
-          </div>
+          </Alert>
         ) : null}
 
         <div className="flex flex-col">

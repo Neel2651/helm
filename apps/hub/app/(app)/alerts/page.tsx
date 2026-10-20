@@ -5,6 +5,7 @@ import { sendTestAlert } from '../../actions';
 import { timeAgo } from '../../../components/display';
 import type { AlertSeverity } from '../../../lib/types';
 import { Button } from '@/components/ui/button';
+import { Alert } from '@/components/ui/alert';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,13 +32,13 @@ export default async function AlertsPage({ searchParams }: AlertsPageProps) {
       </header>
 
       {!telegramConfigured() ? (
-        <div className="rounded-lg border border-degraded-border bg-degraded-soft px-3.5 py-3 text-sm text-degraded">
+        <Alert variant="warning">
           Telegram is not connected, so alerts are only written to the hub log. Set HELM_TELEGRAM_BOT_TOKEN and HELM_TELEGRAM_CHAT_ID, then restart the hub.
-        </div>
+        </Alert>
       ) : null}
 
       {test === 'ok' ? <div className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 border-accent-border">Test message sent to Telegram.</div> : null}
-      {test && test !== 'ok' ? <div className="rounded-lg border border-degraded-border bg-degraded-soft px-3.5 py-3 text-sm text-degraded border-down-border-soft bg-down-soft text-down" role="alert">Test failed: {test}</div> : null}
+      {test && test !== 'ok' ? <Alert variant="error">Test failed: {test}</Alert> : null}
 
       <section className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 flex flex-wrap items-center gap-3 justify-between">
         <div>

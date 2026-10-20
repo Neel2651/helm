@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Alert } from '@/components/ui/alert';
 
 // Rotates a project's collector token. The token is shown once and never stored in plain text.
 export default function TokenButton({ slug }: { slug: string }) {
@@ -30,7 +31,7 @@ export default function TokenButton({ slug }: { slug: string }) {
       <Button type="button" variant="outline" size="sm" onClick={rotate} disabled={busy}>
         {busy ? 'Working…' : token ? 'Rotate again' : 'Generate or rotate token'}
       </Button>
-      {error ? <div className="rounded-lg border border-degraded-border bg-degraded-soft px-3.5 py-3 text-sm text-degraded border-down-border-soft bg-down-soft text-down">{error}</div> : null}
+      {error ? <Alert variant="error">{error}</Alert> : null}
       {token ? (
         <div className="flex flex-col gap-2 rounded-lg border border-accent-border bg-accent px-3.5 py-3 [&_code]:text-[13px] [&_code]:break-all">
           <strong className="text-sm">Copy this token now. It will not be shown again.</strong>

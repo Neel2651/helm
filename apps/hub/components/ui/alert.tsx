@@ -10,6 +10,10 @@ const alertVariants = cva(
         default: "bg-card text-card-foreground",
         destructive:
           "bg-card text-destructive *:data-[slot=alert-description]:text-destructive/90 [&>svg]:text-current",
+        // Helm's health palette, so a notice reads the same as the badge beside it.
+        warning: "border-degraded-border bg-degraded-soft text-degraded",
+        error: "border-down-border-soft bg-down-soft text-down",
+        success: "border-up-border bg-up-soft text-up",
       },
     },
     defaultVariants: {

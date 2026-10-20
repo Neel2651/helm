@@ -5,6 +5,8 @@ import { runBackupNow } from '../../actions';
 import { timeAgo } from '../../../components/display';
 import BackupStatus from '../../../components/BackupStatus';
 import { Button } from '@/components/ui/button';
+import { Alert } from '@/components/ui/alert';
+import Truncate from '@/components/Truncate';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,17 +38,17 @@ export default async function BackupsPage({ searchParams }: BackupsPageProps) {
         </div>
       </header>
 
-      {backupError ? <div className="rounded-lg border border-degraded-border bg-degraded-soft px-3.5 py-3 text-sm text-degraded border-down-border-soft bg-down-soft text-down" role="alert">{backupError}</div> : null}
+      {backupError ? <Alert variant="error">{backupError}</Alert> : null}
 
       {!driveConfigured() ? (
-        <div className="rounded-lg border border-degraded-border bg-degraded-soft px-3.5 py-3 text-sm text-degraded">
+        <Alert variant="warning">
           Google Drive is not connected, so backups cannot run. <Link href="/settings">Connect it in Settings</Link>.
-        </div>
+        </Alert>
       ) : driveNeedsReconnect() ? (
-        <div className="rounded-lg border border-degraded-border bg-degraded-soft px-3.5 py-3 text-sm text-degraded border-down-border-soft bg-down-soft text-down" role="alert">
+        <Alert variant="error">
           Google has revoked Helm&rsquo;s access, so backups are failing.{' '}
           <Link href="/settings">Reconnect Google Drive</Link>.
-        </div>
+        </Alert>
       ) : null}
 
       <section className="grid grid-stats gap-3.5">
@@ -103,7 +105,9 @@ export default async function BackupsPage({ searchParams }: BackupsPageProps) {
                         <span className="text-muted-foreground text-sm">Never</span>
                       )}
                     </td>
-                    <td className="font-mono text-[13px] text-muted-foreground text-sm">{p.backup.driveFolder || `Backups/${p.slug}`}</td>
+                    <td className="max-w-56 font-mono text-[13px] text-muted-foreground">
+                      <Truncate>{p.backup.driveFolder || `Backups/${p.slug}`}</Truncate>
+                    </td>
                     <td className="text-right">
                       <form action={runBackupNow.bind(null, p.slug)}>
                         <input type="hidden" name="returnTo" value="/backups" />
