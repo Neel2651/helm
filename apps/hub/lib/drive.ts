@@ -184,12 +184,35 @@ async function api<T = void, J = never>(url: string, { method = 'GET', json, bod
  * registered on the OAuth client, so it has to be stable: set HELM_PUBLIC_URL on the hub.
  * The request headers are only a convenience for local development.
  */
-export function redirectUri(headers?: { proto?: string | null; host?: string | null }): string {
-  const base = process.env.HELM_PUBLIC_URL?.trim().replace(/\/$/, '');
-  if (base) return `${base}/api/google/callback`;
-  const proto = headers?.proto || 'http';
-  const host = headers?.host || 'localhost:3100';
-  return `${proto}://${host}/api/google/callback`;
+export interface ForwardedHeaders {
+  proto?: string | null;
+  host?: string | null;
+  forwardedHost?: string | null;
+}
+
+/**
+ * The origin a browser reaches this hub on.
+ *
+ * Every user-facing redirect has to be built from this rather than from the incoming
+ * request URL. Behind a reverse proxy, Next sees the internal origin (http://localhost:3100),
+ * so redirecting against req.url sends the browser to localhost — where it has no session
+ * cookie and gets bounced to the login page.
+ *
+ * HELM_PUBLIC_URL wins when set. Otherwise this reads the proxy's forwarded headers, which
+ * the sample nginx config sends.
+ */
+export function publicOrigin(headers?: ForwardedHeaders): string {
+  const configured = process.env.HELM_PUBLIC_URL?.trim().replace(/\/+$/, '');
+  if (configured) return configured;
+  // X-Forwarded-* may be a comma-separated chain; the first entry is the original client.
+  const first = (v?: string | null) => v?.split(',')[0]?.trim() || '';
+  const host = first(headers?.forwardedHost) || first(headers?.host) || 'localhost:3100';
+  const proto = first(headers?.proto) || (host.startsWith('localhost') ? 'http' : 'https');
+  return `${proto}://${host}`;
+}
+
+export function redirectUri(headers?: ForwardedHeaders): string {
+  return `${publicOrigin(headers)}/api/google/callback`;
 }
 
 /** The Google consent URL. `state` is echoed back and checked to block CSRF. */

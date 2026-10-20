@@ -1,3 +1,4 @@
+import { headers } from 'next/headers';
 import { getGoogleAuth } from '../../../lib/store';
 import { driveStatus, oauthClientConfigured, redirectUri } from '../../../lib/drive';
 import { disconnectGoogleDrive, testGoogleDrive } from '../../actions';
@@ -18,6 +19,14 @@ interface SettingsPageProps {
 
 export default async function SettingsPage({ searchParams }: SettingsPageProps) {
   const q = await searchParams;
+  const h = await headers();
+  // Same resolution the connect/callback routes use, so what is shown is what Google sees.
+  const redirect = redirectUri({
+    proto: h.get('x-forwarded-proto'),
+    host: h.get('host'),
+    forwardedHost: h.get('x-forwarded-host'),
+  });
+  const publicUrlSet = Boolean(process.env.HELM_PUBLIC_URL?.trim());
   const auth = getGoogleAuth();
   const status = await driveStatus();
   const clientReady = oauthClientConfigured();
@@ -56,6 +65,16 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
 
         {status.error ? <Alert variant="error">{status.error}</Alert> : null}
 
+        {!publicUrlSet ? (
+          <Alert variant="warning">
+            <span>
+              <strong>HELM_PUBLIC_URL is not set.</strong> The redirect URI above was guessed from the
+              request headers, which is unreliable behind a reverse proxy — a wrong guess sends you to
+              the login page after connecting. Set it to this hub&rsquo;s public origin and restart.
+            </span>
+          </Alert>
+        ) : null}
+
         {status.usingEnvFallback ? (
           <Alert variant="warning">
             Using the refresh token from <code className="font-mono text-[13px]">HELM_GOOGLE_REFRESH_TOKEN</code>. Press Connect to
@@ -78,7 +97,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
           </div>
           <div className="flex justify-between gap-3 border-b border-dashed border-border py-1.5 text-sm last:border-b-0 [&>span:first-child]:text-muted-foreground">
             <span>Redirect URI to register in Google Cloud Console</span>
-            <span className="font-mono text-[13px]">{redirectUri()}</span>
+            <span className="font-mono text-[13px]">{redirect}</span>
           </div>
         </div>
 

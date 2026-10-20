@@ -1,8 +1,18 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { STATE_COOKIE, exchangeCode, redirectUri } from '../../../../lib/drive';
+import { STATE_COOKIE, exchangeCode, publicOrigin, redirectUri } from '../../../../lib/drive';
+
+function forwarded(req: NextRequest) {
+  return {
+    proto: req.headers.get('x-forwarded-proto'),
+    host: req.headers.get('host'),
+    forwardedHost: req.headers.get('x-forwarded-host'),
+  };
+}
 
 function back(req: NextRequest, params: Record<string, string>) {
-  const url = new URL('/settings', req.url);
+  // Built from the public origin, not req.url: behind a proxy req.url is the internal
+  // http://localhost:3100, and redirecting there loses the session cookie.
+  const url = new URL('/settings', publicOrigin(forwarded(req)));
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
   const res = NextResponse.redirect(url);
   res.cookies.delete(STATE_COOKIE);
@@ -27,10 +37,7 @@ export async function GET(req: NextRequest) {
   if (!code) return back(req, { google_error: 'Google did not return an authorisation code.' });
 
   try {
-    await exchangeCode(
-      code,
-      redirectUri({ proto: req.headers.get('x-forwarded-proto'), host: req.headers.get('host') }),
-    );
+    await exchangeCode(code, redirectUri(forwarded(req)));
   } catch (err) {
     return back(req, { google_error: err instanceof Error ? err.message : String(err) });
   }
