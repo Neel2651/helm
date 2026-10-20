@@ -16,6 +16,7 @@ import {
   projectsForClient,
 } from '../lib/store';
 import { startBackup } from '../lib/backup';
+import { disconnectDrive, driveStatus } from '../lib/drive';
 import { notify } from '../lib/notify';
 import type { HealthEndpoint, Project, ProjectLifecycleStatus } from '../lib/types';
 
@@ -95,7 +96,8 @@ export async function saveProject(originalSlug: string | null, formData: FormDat
   const data: Project = {
     name,
     slug,
-    clientId: text(formData, 'client_id') || null,
+    // 'none' is the Select's stand-in for an empty value, which Radix does not allow.
+    clientId: ((v) => (v && v !== 'none' ? v : null))(text(formData, 'client_id')),
     status: (text(formData, 'status') || 'active') as ProjectLifecycleStatus,
     fe_url: text(formData, 'fe_url'),
     be_url: text(formData, 'be_url'),
@@ -223,4 +225,23 @@ export async function removeClient(id: string): Promise<void> {
   deleteClient(id);
   revalidatePath('/clients');
   redirect('/clients');
+}
+
+// --- Google Drive connection ------------------------------------------------------------
+
+export async function disconnectGoogleDrive(): Promise<void> {
+  await disconnectDrive();
+  revalidatePath('/settings');
+  revalidatePath('/backups');
+  redirect('/settings?google_disconnected=1');
+}
+
+// Forces a real token exchange so the page stops guessing from config alone.
+export async function testGoogleDrive(): Promise<void> {
+  const status = await driveStatus();
+  revalidatePath('/settings');
+  const query = status.connected
+    ? 'google_ok=1'
+    : `google_error=${encodeURIComponent(status.error || 'Google Drive is not connected.')}`;
+  redirect(`/settings?${query}`);
 }

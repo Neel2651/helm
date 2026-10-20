@@ -151,12 +151,33 @@ export interface Alert {
   resolvedAt: string | null;
 }
 
+/**
+ * The Google account Helm uploads backups to. Connected from Settings; the refresh token is
+ * encrypted (see lib/crypto.ts) because helm.json sits on disk in plaintext otherwise.
+ */
+export interface GoogleDriveAuth {
+  refreshToken_enc: string;
+  /** Shown in Settings so it is obvious which account backups are going to. */
+  email: string | null;
+  scope: string;
+  connectedAt: string;
+  lastRefreshAt: string | null;
+  /** Google's error code the last time a refresh failed, e.g. 'invalid_grant'. */
+  lastError: string | null;
+  lastErrorAt: string | null;
+}
+
+export interface HelmSettings {
+  google?: GoogleDriveAuth;
+}
+
 export interface HelmDb {
   projects: Record<string, Project>;
   status: Record<string, ProjectStatusRecord>;
   backups: Record<string, BackupRun[]>;
   alerts: Alert[];
   clients: Record<string, Client>;
+  settings: HelmSettings;
 }
 
 /** What a collector posts to POST /api/ingest. */

@@ -60,10 +60,25 @@ The hub machine needs `zip`, plus `mongodump` or `pg_dump` for the databases you
 **Google setup (once):**
 
 1. In Google Cloud Console, create a project and enable the **Google Drive API**.
-2. Set the OAuth consent screen to **In production**. A consent screen left in "Testing" makes the refresh token expire after 7 days.
-3. Create an OAuth client of type **Web application** with the authorised redirect URI `https://developers.google.com/oauthplayground`. (A Desktop app client cannot use that redirect URI.)
-4. Use the [OAuth Playground](https://developers.google.com/oauthplayground): gear icon → tick "Use your own OAuth credentials" and enter the client ID and secret. Authorise the scope `https://www.googleapis.com/auth/drive.file`, then exchange the code for tokens and copy the **refresh token**.
-5. Put the three values in the hub's `.env.local` as `HELM_GOOGLE_CLIENT_ID`, `HELM_GOOGLE_CLIENT_SECRET` and `HELM_GOOGLE_REFRESH_TOKEN`.
+2. On the OAuth consent screen, press **Publish app** so it is **In production**. A consent screen
+   left in "Testing" makes every refresh token expire after 7 days, which is the usual reason
+   backups stop working a week after they were set up.
+3. Create an OAuth client of type **Web application**. Add the hub's callback as an authorised
+   redirect URI: `https://helm.example.com/api/google/callback`. Settings shows the exact string
+   to paste, and Google matches it character for character.
+4. Put the client ID and secret in the hub's `.env.local` as `HELM_GOOGLE_CLIENT_ID` and
+   `HELM_GOOGLE_CLIENT_SECRET`, set `HELM_PUBLIC_URL` to the hub's public origin, and restart it.
+5. Open **Settings → Google Drive** in Helm and press **Connect Google Drive**.
+
+Helm then renews its own access indefinitely. It only ever asks for the `drive.file` scope, so it
+can see the files and folders it creates and nothing else in the Drive. Press **Disconnect** to
+revoke it.
+
+If a connection does break, Settings says what Google actually returned and Telegram gets an alert
+straight away, rather than it surfacing at the next scheduled backup.
+
+`HELM_GOOGLE_REFRESH_TOKEN` is still honoured for hubs set up before Settings existed. Connecting
+in the app replaces it.
 
 Turn backups on per project (Edit settings → Backups), or press **Run backup now** on the project or Backups page.
 

@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getClient, projectsForClient, getStatus } from '../../../../lib/store';
-import { StateBadge, timeAgo } from '../../../../components/ui';
+import { StateBadge, timeAgo } from '../../../../components/display';
 import ClientForm from '../../../../components/ClientForm';
 import { saveClient, removeClient } from '../../../actions';
+import { Button } from '@/components/ui/button';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,18 +23,18 @@ export default async function ClientPage({ params, searchParams }: ClientPagePro
   return (
     <>
       <header>
-        <div className="muted small"><Link href="/clients">Clients</Link> / {client.name}</div>
-        <h1 style={{ marginTop: 4 }}>{client.name}</h1>
+        <div className="text-muted-foreground text-sm"><Link href="/clients">Clients</Link> / {client.name}</div>
+        <h1 className="mt-1">{client.name}</h1>
       </header>
 
-      {error ? <div className="notice notice-error" role="alert">{error}</div> : null}
+      {error ? <div className="rounded-lg border border-degraded-border bg-degraded-soft px-3.5 py-3 text-sm text-degraded border-down-border-soft bg-down-soft text-down" role="alert">{error}</div> : null}
 
-      <section className="card stack" style={{ gap: 12 }}>
+      <section className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 flex flex-col gap-4 gap-3">
         <h2>Linked projects</h2>
         {projects.length === 0 ? (
-          <p className="muted small">No projects linked yet. Set this client on a project&rsquo;s General settings.</p>
+          <p className="text-muted-foreground text-sm">No projects linked yet. Set this client on a project&rsquo;s General settings.</p>
         ) : (
-          <div className="table-wrap">
+          <div className="overflow-x-auto">
             <table>
               <thead>
                 <tr><th>Project</th><th>State</th><th>Last check</th></tr>
@@ -43,7 +44,7 @@ export default async function ClientPage({ params, searchParams }: ClientPagePro
                   <tr key={p.slug}>
                     <td><Link href={`/projects/${p.slug}`}><strong>{p.name}</strong></Link></td>
                     <td><StateBadge state={getStatus(p.slug)?.state || 'unknown'} /></td>
-                    <td className="muted small">{timeAgo(getStatus(p.slug)?.checkedAt)}</td>
+                    <td className="text-muted-foreground text-sm">{timeAgo(getStatus(p.slug)?.checkedAt)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -52,17 +53,17 @@ export default async function ClientPage({ params, searchParams }: ClientPagePro
         )}
       </section>
 
-      <section className="card">
+      <section className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0">
         <ClientForm client={client} action={saveClient.bind(null, client.id)} submitLabel="Save changes" />
       </section>
 
-      <section className="card row between" style={{ borderColor: '#efc3bf' }}>
+      <section className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 flex items-center gap-3 justify-between border-down-border-soft">
         <div>
           <strong>Delete client</strong>
-          <p className="muted small">Unlink any projects first (set their Client back to &ldquo;No client&rdquo;).</p>
+          <p className="text-muted-foreground text-sm">Unlink any projects first (set their Client back to &ldquo;No client&rdquo;).</p>
         </div>
         <form action={removeClient.bind(null, client.id)}>
-          <button type="submit" className="btn btn-danger" disabled={projects.length > 0}>Delete</button>
+          <Button type="submit" variant="destructive" disabled={projects.length > 0}>Delete</Button>
         </form>
       </section>
     </>

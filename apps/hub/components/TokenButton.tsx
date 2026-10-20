@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 
 // Rotates a project's collector token. The token is shown once and never stored in plain text.
 export default function TokenButton({ slug }: { slug: string }) {
@@ -25,16 +26,16 @@ export default function TokenButton({ slug }: { slug: string }) {
   }
 
   return (
-    <div className="stack" style={{ gap: 10 }}>
-      <button type="button" className="btn btn-sm" onClick={rotate} disabled={busy}>
+    <div className="flex flex-col gap-4 gap-2.5">
+      <Button type="button" variant="outline" size="sm" onClick={rotate} disabled={busy}>
         {busy ? 'Working…' : token ? 'Rotate again' : 'Generate or rotate token'}
-      </button>
-      {error ? <div className="notice notice-error">{error}</div> : null}
+      </Button>
+      {error ? <div className="rounded-lg border border-degraded-border bg-degraded-soft px-3.5 py-3 text-sm text-degraded border-down-border-soft bg-down-soft text-down">{error}</div> : null}
       {token ? (
-        <div className="secret-box">
-          <strong style={{ fontSize: 14 }}>Copy this token now. It will not be shown again.</strong>
+        <div className="flex flex-col gap-2 rounded-lg border border-accent-border bg-accent px-3.5 py-3 [&_code]:text-[13px] [&_code]:break-all">
+          <strong className="text-sm">Copy this token now. It will not be shown again.</strong>
           <code>{token}</code>
-          <span className="small muted">Set it on the server as HELM_COLLECTOR_TOKEN.</span>
+          <span className="text-sm text-muted-foreground">Set it on the server as HELM_COLLECTOR_TOKEN.</span>
         </div>
       ) : null}
     </div>

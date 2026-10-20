@@ -8,8 +8,23 @@ const STATE_LABEL: Record<HealthState, string> = {
   unknown: 'No checks yet',
 };
 
+const STATE_CLASS: Record<HealthState, string> = {
+  up: 'bg-up-soft text-up',
+  degraded: 'bg-degraded-soft text-degraded',
+  down: 'bg-down-soft text-down',
+  unknown: 'bg-unknown-soft text-unknown',
+};
+
 export function StateBadge({ state = 'unknown' as HealthState }: { state?: HealthState }) {
-  return <span className={`badge badge-${state}`}>{STATE_LABEL[state] || state}</span>;
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold whitespace-nowrap before:size-1.5 before:rounded-full before:bg-current ${
+        STATE_CLASS[state] || STATE_CLASS.unknown
+      }`}
+    >
+      {STATE_LABEL[state] || state}
+    </span>
+  );
 }
 
 export function timeAgo(iso: string | null | undefined): string {

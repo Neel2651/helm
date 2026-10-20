@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { login } from '../actions';
+import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = { title: 'Sign in · Helm' };
 
@@ -7,22 +8,22 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const { error } = await searchParams;
 
   return (
-    <div className="login-wrap">
-      <div className="card login-card">
-        <div className="row">
-          <span className="brand-mark" aria-hidden="true" style={{ width: 30, height: 30, position: 'relative', borderRadius: '50%', border: '3px solid var(--accent)' }} />
+    <div className="grid min-h-dvh place-items-center p-6 pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+      <div className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 flex w-full max-w-95 flex-col gap-5">
+        <div className="flex items-center gap-3">
+          <span className="brand-mark relative size-7.5 rounded-full border-[3px] border-primary" aria-hidden="true"/>
           <h1>Sign in to Helm</h1>
         </div>
-        <p className="muted small">Private dashboard. Only the owner can sign in.</p>
+        <p className="text-muted-foreground text-sm">Private dashboard. Only the owner can sign in.</p>
 
-        {error ? <div className="notice notice-error" role="alert">Wrong password. Try again.</div> : null}
+        {error ? <div className="rounded-lg border border-degraded-border bg-degraded-soft px-3.5 py-3 text-sm text-degraded border-down-border-soft bg-down-soft text-down" role="alert">Wrong password. Try again.</div> : null}
 
-        <form action={login} className="form" style={{ gap: 14 }}>
-          <label className="field">
-            <span className="field-label">Password</span>
+        <form action={login} className="form gap-3.5">
+          <label className="flex flex-col gap-1.5">
+            <span className="text-[13px] font-semibold">Password</span>
             <input type="password" name="password" required autoFocus autoComplete="current-password" />
           </label>
-          <button type="submit" className="btn btn-primary">Sign in</button>
+          <Button type="submit">Sign in</Button>
         </form>
       </div>
     </div>

@@ -5,7 +5,7 @@ import path from 'node:path';
 import { execFile } from 'node:child_process';
 import { getProject, addBackupRun, updateBackupRun } from './store';
 import { decrypt, encryptBuffer } from './crypto';
-import { driveConfigured, ensureFolderPath, uploadBackup, deleteOldBackups } from './drive';
+import { driveConfigured, driveNeedsReconnect, ensureFolderPath, uploadBackup, deleteOldBackups } from './drive';
 import { evaluateBackup } from './alerts';
 import type { BackupRun, BackupTrigger, DbType, Project } from './types';
 
@@ -60,9 +60,10 @@ export function startBackup(slug: string, trigger: BackupTrigger = 'manual'): St
   if (!project) throw new Error('Project not found.');
   if (running.has(slug)) throw new Error('A backup is already running for this project.');
   if (!driveConfigured()) {
-    throw new Error(
-      'Google Drive is not configured. Set HELM_GOOGLE_CLIENT_ID, HELM_GOOGLE_CLIENT_SECRET and HELM_GOOGLE_REFRESH_TOKEN on the hub.',
-    );
+    throw new Error('Google Drive is not connected. Connect it in Settings.');
+  }
+  if (driveNeedsReconnect()) {
+    throw new Error('Google has revoked Helm\u2019s access to Drive. Reconnect it in Settings.');
   }
   if (!project.database?.url_enc) throw new Error('No database connection string is saved for this project.');
 

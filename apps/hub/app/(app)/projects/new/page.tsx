@@ -8,10 +8,10 @@ export default function NewProjectPage() {
   return (
     <>
       <header>
-        <div className="muted small"><Link href="/projects">Projects</Link> / New</div>
-        <h1 style={{ marginTop: 4 }}>New project</h1>
+        <div className="text-muted-foreground text-sm"><Link href="/projects">Projects</Link> / New</div>
+        <h1 className="mt-1">New project</h1>
       </header>
-      <div className="card">
+      <div className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0">
         <ProjectForm action={saveProject.bind(null, null)} submitLabel="Create project" />
       </div>
     </>

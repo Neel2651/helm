@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { listProjects, allBackupRuns, listBackupRuns } from '../../../lib/store';
-import { driveConfigured } from '../../../lib/drive';
+import { driveConfigured, driveNeedsReconnect } from '../../../lib/drive';
 import { runBackupNow } from '../../actions';
-import { timeAgo } from '../../../components/ui';
+import { timeAgo } from '../../../components/display';
 import BackupStatus from '../../../components/BackupStatus';
+import { Button } from '@/components/ui/button';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,45 +29,50 @@ export default async function BackupsPage({ searchParams }: BackupsPageProps) {
 
   return (
     <>
-      <header className="row-wrap between">
+      <header className="flex flex-wrap items-center gap-3 justify-between">
         <div>
           <h1>Backups</h1>
-          <p className="muted small">Database dumps, zipped and encrypted, uploaded to Google Drive.</p>
+          <p className="text-muted-foreground text-sm">Database dumps, zipped and encrypted, uploaded to Google Drive.</p>
         </div>
       </header>
 
-      {backupError ? <div className="notice notice-error" role="alert">{backupError}</div> : null}
+      {backupError ? <div className="rounded-lg border border-degraded-border bg-degraded-soft px-3.5 py-3 text-sm text-degraded border-down-border-soft bg-down-soft text-down" role="alert">{backupError}</div> : null}
 
       {!driveConfigured() ? (
-        <div className="notice">
-          Google Drive is not connected. Set HELM_GOOGLE_CLIENT_ID, HELM_GOOGLE_CLIENT_SECRET and HELM_GOOGLE_REFRESH_TOKEN on the hub, then restart it.
+        <div className="rounded-lg border border-degraded-border bg-degraded-soft px-3.5 py-3 text-sm text-degraded">
+          Google Drive is not connected, so backups cannot run. <Link href="/settings">Connect it in Settings</Link>.
+        </div>
+      ) : driveNeedsReconnect() ? (
+        <div className="rounded-lg border border-degraded-border bg-degraded-soft px-3.5 py-3 text-sm text-degraded border-down-border-soft bg-down-soft text-down" role="alert">
+          Google has revoked Helm&rsquo;s access, so backups are failing.{' '}
+          <Link href="/settings">Reconnect Google Drive</Link>.
         </div>
       ) : null}
 
-      <section className="grid-stats">
-        <div className="card">
-          <div className="stat-label">Projects with backups</div>
-          <div className="stat-value">{enabled.length}<span className="muted" style={{ fontSize: 16 }}> / {projects.length}</span></div>
+      <section className="grid grid-stats gap-3.5">
+        <div className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0">
+          <div className="text-[13px] font-semibold text-muted-foreground">Projects with backups</div>
+          <div className="mt-1 text-[28px] font-bold tracking-tight">{enabled.length}<span className="text-muted-foreground text-base"> / {projects.length}</span></div>
         </div>
-        <div className="card">
-          <div className="stat-label">Last successful backup</div>
-          <div className="stat-value" style={{ fontSize: 18, marginTop: 10, color: lastSuccess ? 'var(--up)' : 'var(--muted)' }}>
+        <div className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0">
+          <div className="text-[13px] font-semibold text-muted-foreground">Last successful backup</div>
+          <div className={`mt-2.5 text-lg font-bold tracking-tight ${lastSuccess ? 'text-up' : 'text-muted-foreground'}`}>
             {lastSuccess ? `${lastSuccess.slug} · ${timeAgo(lastSuccess.startedAt)}` : 'None yet'}
           </div>
         </div>
-        <div className="card">
-          <div className="stat-label">Failed, last 7 days</div>
-          <div className="stat-value" style={{ color: failedThisWeek ? 'var(--down)' : 'var(--text)' }}>{failedThisWeek}</div>
+        <div className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0">
+          <div className="text-[13px] font-semibold text-muted-foreground">Failed, last 7 days</div>
+          <div className={`mt-1 text-[28px] font-bold tracking-tight ${failedThisWeek ? 'text-down' : 'text-foreground'}`}>{failedThisWeek}</div>
         </div>
       </section>
 
-      <section className="card table-wrap" style={{ padding: 0 }}>
-        <div className="row between" style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)' }}>
+      <section className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 overflow-x-auto p-0">
+        <div className="flex items-center gap-3 justify-between border-b border-border px-4 py-3.5">
           <h2>Schedules</h2>
-          <span className="muted small">Times use the hub machine&rsquo;s timezone</span>
+          <span className="text-muted-foreground text-sm">Times use the hub machine&rsquo;s timezone</span>
         </div>
         {enabled.length === 0 ? (
-          <p className="muted small" style={{ padding: 16 }}>
+          <p className="text-muted-foreground text-sm p-4">
             No backups scheduled. Turn them on in a project&rsquo;s Backups settings.
           </p>
         ) : (
@@ -86,22 +92,22 @@ export default async function BackupsPage({ searchParams }: BackupsPageProps) {
                 return (
                   <tr key={p.slug}>
                     <td><Link href={`/projects/${p.slug}`}><strong>{p.name}</strong></Link></td>
-                    <td className="mono muted">{p.backup.cron}</td>
+                    <td className="font-mono text-[13px] text-muted-foreground">{p.backup.cron}</td>
                     <td>
                       {last ? (
-                        <span className="row" style={{ gap: 8 }}>
+                        <span className="flex items-center gap-3 gap-2">
                           <BackupStatus status={last.status} />
-                          <span className="muted small">{timeAgo(last.startedAt)}</span>
+                          <span className="text-muted-foreground text-sm">{timeAgo(last.startedAt)}</span>
                         </span>
                       ) : (
-                        <span className="muted small">Never</span>
+                        <span className="text-muted-foreground text-sm">Never</span>
                       )}
                     </td>
-                    <td className="mono muted small">{p.backup.driveFolder || `Backups/${p.slug}`}</td>
-                    <td style={{ textAlign: 'right' }}>
+                    <td className="font-mono text-[13px] text-muted-foreground text-sm">{p.backup.driveFolder || `Backups/${p.slug}`}</td>
+                    <td className="text-right">
                       <form action={runBackupNow.bind(null, p.slug)}>
                         <input type="hidden" name="returnTo" value="/backups" />
-                        <button type="submit" className="btn btn-sm" disabled={!driveConfigured()}>Run now</button>
+                        <Button type="submit" variant="outline" size="sm" disabled={!driveConfigured() || driveNeedsReconnect()}>Run now</Button>
                       </form>
                     </td>
                   </tr>
@@ -112,13 +118,13 @@ export default async function BackupsPage({ searchParams }: BackupsPageProps) {
         )}
       </section>
 
-      <section className="card table-wrap" style={{ padding: 0 }}>
-        <div className="row between" style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)' }}>
+      <section className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 overflow-x-auto p-0">
+        <div className="flex items-center gap-3 justify-between border-b border-border px-4 py-3.5">
           <h2>Recent runs</h2>
-          <span className="muted small">All projects, newest first</span>
+          <span className="text-muted-foreground text-sm">All projects, newest first</span>
         </div>
         {runs.length === 0 ? (
-          <p className="muted small" style={{ padding: 16 }}>No runs yet.</p>
+          <p className="text-muted-foreground text-sm p-4">No runs yet.</p>
         ) : (
           <table>
             <thead>
@@ -135,15 +141,15 @@ export default async function BackupsPage({ searchParams }: BackupsPageProps) {
             <tbody>
               {runs.slice(0, 30).map((r) => (
                 <tr key={r.id}>
-                  <td className="muted small">{new Date(r.startedAt).toLocaleString()}</td>
+                  <td className="text-muted-foreground text-sm">{new Date(r.startedAt).toLocaleString()}</td>
                   <td><Link href={`/projects/${r.slug}`}>{r.slug}</Link></td>
-                  <td className="muted small">{r.trigger}</td>
-                  <td className="mono small">{formatBytes(r.bytes)}</td>
-                  <td className="mono small">{r.durationMs ? `${Math.round(r.durationMs / 1000)}s` : '—'}</td>
-                  <td>{r.verified ? <span style={{ color: 'var(--up)' }}>Yes</span> : <span className="muted">No</span>}</td>
+                  <td className="text-muted-foreground text-sm">{r.trigger}</td>
+                  <td className="font-mono text-[13px] text-sm">{formatBytes(r.bytes)}</td>
+                  <td className="font-mono text-[13px] text-sm">{r.durationMs ? `${Math.round(r.durationMs / 1000)}s` : '—'}</td>
+                  <td>{r.verified ? <span className="text-up">Yes</span> : <span className="text-muted-foreground">No</span>}</td>
                   <td>
                     <BackupStatus status={r.status} />
-                    {r.error ? <div className="small" style={{ color: 'var(--down)', whiteSpace: 'normal', maxWidth: 360 }}>{r.error}</div> : null}
+                    {r.error ? <div className="text-sm max-w-90 whitespace-normal text-down">{r.error}</div> : null}
                   </td>
                 </tr>
               ))}

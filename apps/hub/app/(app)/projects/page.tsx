@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { listProjects, getAllStatus, clientNameFor } from '../../../lib/store';
-import { StateBadge, timeAgo } from '../../../components/ui';
+import { StateBadge, timeAgo } from '../../../components/display';
+import { Button } from '@/components/ui/button';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,20 +11,20 @@ export default function ProjectsPage() {
 
   return (
     <>
-      <header className="row-wrap between">
+      <header className="flex flex-wrap items-center gap-3 justify-between">
         <div>
           <h1>Projects</h1>
-          <p className="muted small">Configuration for every project Helm watches.</p>
+          <p className="text-muted-foreground text-sm">Configuration for every project Helm watches.</p>
         </div>
-        <Link href="/projects/new" className="btn btn-primary">New project</Link>
+        <Button asChild><Link href="/projects/new">New project</Link></Button>
       </header>
 
       {projects.length === 0 ? (
-        <div className="card">
-          <p className="muted">No projects yet.</p>
+        <div className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0">
+          <p className="text-muted-foreground">No projects yet.</p>
         </div>
       ) : (
-        <div className="card table-wrap" style={{ padding: 0 }}>
+        <div className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 overflow-x-auto p-0">
           <table>
             <thead>
               <tr>
@@ -45,17 +46,17 @@ export default function ProjectsPage() {
                       <Link href={`/projects/${p.slug}`}><strong>{p.name}</strong></Link>
                       {clientName ? (
                         p.clientId ? (
-                          <div className="muted small"><Link href={`/clients/${p.clientId}`}>{clientName}</Link></div>
+                          <div className="text-muted-foreground text-sm"><Link href={`/clients/${p.clientId}`}>{clientName}</Link></div>
                         ) : (
-                          <div className="muted small">{clientName}</div>
+                          <div className="text-muted-foreground text-sm">{clientName}</div>
                         )
                       ) : null}
                     </td>
                     <td><StateBadge state={s?.state || 'unknown'} /></td>
-                    <td className="mono muted">{p.fe_url || '—'}</td>
-                    <td className="mono muted">{p.server_host || '—'}</td>
-                    <td>{p.backup?.enabled ? <span className="tag">{p.backup.cron}</span> : <span className="muted small">Off</span>}</td>
-                    <td className="muted small">{timeAgo(s?.checkedAt)}</td>
+                    <td className="font-mono text-[13px] text-muted-foreground">{p.fe_url || '—'}</td>
+                    <td className="font-mono text-[13px] text-muted-foreground">{p.server_host || '—'}</td>
+                    <td>{p.backup?.enabled ? <span className="inline-block rounded-md border border-border bg-secondary px-2 py-0.5 text-xs text-muted-foreground">{p.backup.cron}</span> : <span className="text-muted-foreground text-sm">Off</span>}</td>
+                    <td className="text-muted-foreground text-sm">{timeAgo(s?.checkedAt)}</td>
                   </tr>
                 );
               })}

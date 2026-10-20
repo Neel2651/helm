@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type { Alert, BackupRun, Client, HelmDb, Project, ProjectStatusRecord } from './types';
+import type { Alert, BackupRun, Client, GoogleDriveAuth, HelmDb, Project, ProjectStatusRecord } from './types';
 
 // JSON file store for the MVP. Swap for Postgres (Drizzle) when the hub moves to a server.
 const FILE = process.env.HELM_DATA_FILE || path.join(process.cwd(), 'data', 'helm.json');
@@ -14,9 +14,10 @@ function read(): HelmDb {
       backups: parsed.backups || {},
       alerts: parsed.alerts || [],
       clients: parsed.clients || {},
+      settings: parsed.settings || {},
     };
   } catch {
-    return { projects: {}, status: {}, backups: {}, alerts: [], clients: {} };
+    return { projects: {}, status: {}, backups: {}, alerts: [], clients: {}, settings: {} };
   }
 }
 
@@ -145,5 +146,34 @@ export function getAllStatus(): Record<string, ProjectStatusRecord> {
 export function setStatus(slug: string, status: ProjectStatusRecord): void {
   const db = read();
   db.status[slug] = status;
+  write(db);
+}
+
+// Google Drive connection. One account for the whole hub, so this lives in settings
+// rather than on a project.
+export function getGoogleAuth(): GoogleDriveAuth | null {
+  return read().settings.google || null;
+}
+
+export function setGoogleAuth(patch: Partial<GoogleDriveAuth>): void {
+  const db = read();
+  const current = db.settings.google;
+  db.settings.google = {
+    refreshToken_enc: '',
+    email: null,
+    scope: '',
+    connectedAt: new Date().toISOString(),
+    lastRefreshAt: null,
+    lastError: null,
+    lastErrorAt: null,
+    ...current,
+    ...patch,
+  };
+  write(db);
+}
+
+export function clearGoogleAuth(): void {
+  const db = read();
+  delete db.settings.google;
   write(db);
 }

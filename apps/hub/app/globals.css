@@ -1,15 +1,53 @@
-/* Helm light theme: warm paper, deep teal accent. */
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+
+/* System dark mode. No toggle, so no class on <html>, no JS, no flash of the wrong theme. */
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    @slot;
+  }
+}
+
 :root {
-  --bg: #f6f4ef;
-  --surface: #ffffff;
-  --surface-2: #fbfaf7;
+  --radius: 0.625rem; /* the old 10px */
+
+  /* shadcn semantics carrying Helm's warm-paper + teal identity.
+     Note --accent here is shadcn's "hover/highlight surface", NOT Helm's brand teal:
+     the brand teal is --primary. Mapping them the other way round would turn every
+     hover state teal and every button paper-coloured. */
+  --background: #f6f4ef;
+  --foreground: #22201b;
+  --card: #ffffff;
+  --card-foreground: #22201b;
+  --popover: #ffffff;
+  --popover-foreground: #22201b;
+  --primary: #0e6e61;
+  --primary-foreground: #ffffff;
+  --secondary: #fbfaf7;
+  --secondary-foreground: #22201b;
+  --muted: #ece8df;
+  --muted-foreground: #6b6556;
+  --accent: #e2f1ee;
+  --accent-foreground: #0e6e61;
+  --destructive: #a8231c;
+  --destructive-foreground: #ffffff;
   --border: #e3ddd0;
-  --border-strong: #cfc7b6;
-  --text: #22201b;
-  --muted: #6b6556;
-  --accent: #0e6e61;
-  --accent-hover: #0a5a4f;
-  --accent-soft: #e2f1ee;
+  --input: #cfc7b6;
+  --ring: #0e6e61;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #22201b;
+  --sidebar-primary: #0e6e61;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e2f1ee;
+  --sidebar-accent-foreground: #0e6e61;
+  --sidebar-border: #e3ddd0;
+  --sidebar-ring: #0e6e61;
+
+  /* Health semantics. shadcn has no equivalent and the badges depend on them. */
+  --primary-hover: #0a5a4f;
   --up: #2c6e45;
   --up-soft: #e4f1e8;
   --degraded: #9a5b00;
@@ -18,190 +56,196 @@
   --down-soft: #f8e3e1;
   --unknown: #6b6556;
   --unknown-soft: #ece8df;
-  --radius: 10px;
+
+  /* Border tints that used to be unnamed one-off hexes scattered through the stylesheet. */
+  --down-border: #e6b8b4;
+  --down-border-soft: #efc3bf;
+  --degraded-border: #efd9a8;
+  --up-border: #bcdcc7;
+  --accent-border: #b9dcd5;
   --shadow: 0 1px 2px rgba(34, 32, 27, 0.05);
 }
 
-* { box-sizing: border-box; }
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #1a1815;
+    --foreground: #f2efe7;
+    --card: #232019;
+    --card-foreground: #f2efe7;
+    --popover: #232019;
+    --popover-foreground: #f2efe7;
+    /* Lightened: #0e6e61 is unreadable on a dark ground. */
+    --primary: #3fae9c;
+    --primary-foreground: #0b2420;
+    --secondary: #2b2721;
+    --secondary-foreground: #f2efe7;
+    --muted: #2b2721;
+    --muted-foreground: #a8a090;
+    --accent: #17352f;
+    --accent-foreground: #7fd3c3;
+    --destructive: #f1766c;
+    --destructive-foreground: #2a0f0d;
+    --border: oklch(1 0 0 / 12%);
+    --input: oklch(1 0 0 / 18%);
+    --ring: #3fae9c;
 
-html, body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  font-size: 15px;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
+    --sidebar: #232019;
+    --sidebar-foreground: #f2efe7;
+    --sidebar-primary: #3fae9c;
+    --sidebar-primary-foreground: #0b2420;
+    --sidebar-accent: #17352f;
+    --sidebar-accent-foreground: #7fd3c3;
+    --sidebar-border: oklch(1 0 0 / 12%);
+    --sidebar-ring: #3fae9c;
+
+    --primary-hover: #56c4b1;
+    --up: #5fc08a;
+    --up-soft: #15291e;
+    --degraded: #e0a33a;
+    --degraded-soft: #2e2415;
+    --down: #f1766c;
+    --down-soft: #331a18;
+    --unknown: #a8a090;
+    --unknown-soft: #2b2721;
+
+    --down-border: #5a2b27;
+    --down-border-soft: #5a2b27;
+    --degraded-border: #4a3a1a;
+    --up-border: #24422f;
+    --accent-border: #1f4a41;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  }
 }
 
-a { color: var(--accent); text-decoration: none; }
-a:hover { color: var(--accent-hover); text-decoration: underline; }
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 
-h1, h2, h3 { margin: 0; line-height: 1.25; }
-h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.01em; }
-h2 { font-size: 16px; font-weight: 700; }
-p { margin: 0; }
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 
-.mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
-.muted { color: var(--muted); }
-.small { font-size: 13px; }
-.stack { display: flex; flex-direction: column; gap: 16px; }
-.row { display: flex; align-items: center; gap: 12px; }
-.row-wrap { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.between { justify-content: space-between; }
-.grow { flex: 1; min-width: 0; }
+  --color-up: var(--up);
+  --color-up-soft: var(--up-soft);
+  --color-degraded: var(--degraded);
+  --color-degraded-soft: var(--degraded-soft);
+  --color-down: var(--down);
+  --color-down-soft: var(--down-soft);
+  --color-unknown: var(--unknown);
+  --color-unknown-soft: var(--unknown-soft);
+  --color-down-border: var(--down-border);
+  --color-down-border-soft: var(--down-border-soft);
+  --color-degraded-border: var(--degraded-border);
+  --color-up-border: var(--up-border);
+  --color-accent-border: var(--accent-border);
 
-/* Shell */
-.shell { display: flex; min-height: 100vh; flex-wrap: wrap; }
-.sidebar {
-  flex: 0 0 232px;
-  padding: 24px 16px;
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.brand { display: flex; align-items: center; gap: 10px; padding: 4px 10px 24px; font-weight: 800; font-size: 18px; letter-spacing: -0.01em; color: var(--text); }
-.brand:hover { text-decoration: none; color: var(--text); }
-.brand-mark { width: 26px; height: 26px; border-radius: 50%; border: 3px solid var(--accent); position: relative; }
-.brand-mark::after { content: ''; position: absolute; inset: 4px; border-radius: 50%; background: var(--accent-soft); }
-.nav-link {
-  padding: 9px 12px;
-  border-radius: 8px;
-  color: var(--muted);
-  font-weight: 600;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.nav-link:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
-.nav-link.active { background: var(--accent-soft); color: var(--accent); }
-.nav-link.disabled { opacity: 0.55; pointer-events: none; }
-.nav-soon { font-size: 11px; font-weight: 700; color: var(--muted); background: var(--unknown-soft); padding: 1px 7px; border-radius: 999px; }
-.sidebar-foot { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
-.main { flex: 999 1 560px; min-width: 0; padding: 28px 36px 48px; display: flex; flex-direction: column; gap: 24px; }
+  --font-sans: var(--font-manrope), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, monospace;
 
-/* Cards and layout */
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 18px;
-  min-width: 0;
-}
-.grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; }
-.stat-label { color: var(--muted); font-size: 13px; font-weight: 600; }
-.stat-value { font-size: 28px; font-weight: 700; margin-top: 4px; letter-spacing: -0.02em; }
-.grid-projects { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
-.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; }
-.project-card { display: flex; flex-direction: column; gap: 12px; color: inherit; }
-.project-card:hover { border-color: var(--border-strong); text-decoration: none; }
-.project-card.is-down { border-color: #e6b8b4; }
-
-/* Badges */
-.badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
-.badge::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
-.badge-up { color: var(--up); background: var(--up-soft); }
-.badge-degraded { color: var(--degraded); background: var(--degraded-soft); }
-.badge-down { color: var(--down); background: var(--down-soft); }
-.badge-unknown { color: var(--unknown); background: var(--unknown-soft); }
-.tag { display: inline-block; padding: 2px 8px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border); font-size: 12px; color: var(--muted); }
-
-/* Lists */
-.kv { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; padding: 6px 0; border-bottom: 1px dashed var(--border); }
-.kv:last-child { border-bottom: 0; }
-.kv span:first-child { color: var(--muted); }
-.check-list { display: flex; flex-direction: column; gap: 6px; }
-.check { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
-.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; }
-.dot-up { background: var(--up); }
-.dot-bad { background: var(--down); }
-.dot-warn { background: var(--degraded); }
-.log {
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 12px;
-  line-height: 1.7;
-  overflow-x: auto;
-  max-height: 260px;
-  overflow-y: auto;
-  white-space: pre;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* Table */
-.table-wrap { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--border); white-space: nowrap; }
-th { color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; background: var(--surface-2); }
-tr:last-child td { border-bottom: 0; }
-
-/* Forms */
-form.form { display: flex; flex-direction: column; gap: 22px; }
-.form-section { display: flex; flex-direction: column; gap: 14px; }
-.form-section-head { display: flex; flex-direction: column; gap: 2px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
-.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px 18px; }
-.field { display: flex; flex-direction: column; gap: 6px; }
-.field-wide { grid-column: 1 / -1; }
-.field-label { font-size: 13px; font-weight: 600; color: var(--text); }
-.hint { font-size: 12px; color: var(--muted); }
-input[type='text'], input[type='password'], input[type='url'], input[type='number'], select, textarea {
-  width: 100%;
-  font: inherit;
-  font-size: 14px;
-  color: var(--text);
-  background: var(--surface);
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  padding: 9px 11px;
+/* The intrinsic grids. Tailwind has no utility for auto-fit/minmax, and naming them here
+   keeps them variant-friendly (md:grid-projects) and out of the markup. */
+@utility grid-stats {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
 }
-input.mono, textarea.mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; }
-textarea { min-height: 84px; resize: vertical; }
-input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
-.check-field { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; }
-.check-field input { width: 16px; height: 16px; accent-color: var(--accent); }
-
-/* Buttons */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 700;
-  padding: 9px 14px;
-  border-radius: 8px;
-  border: 1px solid var(--border-strong);
-  background: var(--surface);
-  color: var(--text);
-  cursor: pointer;
+@utility grid-projects {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 }
-.btn:hover { background: var(--surface-2); text-decoration: none; color: var(--text); }
-.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-.btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); color: #fff; }
-.btn-danger { color: var(--down); border-color: #e6b8b4; }
-.btn-danger:hover { background: var(--down-soft); color: var(--down); }
-.btn-sm { padding: 6px 10px; font-size: 13px; }
+@utility grid-panels {
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+}
+@utility grid-form {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
 
-/* Notices */
-.notice { padding: 12px 14px; border-radius: 8px; font-size: 14px; background: var(--degraded-soft); color: var(--degraded); border: 1px solid #efd9a8; }
-.notice-error { background: var(--down-soft); color: var(--down); border-color: #efc3bf; }
-.secret-box { padding: 12px 14px; border-radius: 8px; background: var(--accent-soft); border: 1px solid #b9dcd5; display: flex; flex-direction: column; gap: 8px; }
-.secret-box code { word-break: break-all; font-size: 13px; }
+/* iOS safe areas. viewportFit:'cover' in app/layout.tsx promises these; without them the
+   installed PWA renders its nav underneath the status bar, where it cannot be tapped. */
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@utility px-safe {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
 
-/* Login */
-.login-wrap { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
-.login-card { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 20px; }
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    /* Native scrollbars and form controls follow the system theme. */
+    color-scheme: light dark;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-size: 15px;
+    line-height: 1.5;
+  }
 
-/* Mobile */
-@media (max-width: 760px) {
-  .sidebar { flex: 1 1 100%; flex-direction: row; flex-wrap: wrap; align-items: center; padding: 12px 16px; border-right: 0; border-bottom: 1px solid var(--border); }
-  .brand { padding: 0 8px 0 0; }
-  .sidebar .nav-link { padding: 6px 10px; }
-  .sidebar-foot { margin: 0 0 0 auto; flex-direction: row; }
-  .main { padding: 20px 16px 40px; }
-  .stat-value { font-size: 24px; }
+  a {
+    @apply text-primary no-underline hover:text-primary-hover hover:underline;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply m-0 leading-tight;
+  }
+  h1 {
+    @apply text-2xl font-bold tracking-tight;
+  }
+  h2 {
+    @apply text-base font-bold;
+  }
+  p {
+    @apply m-0;
+  }
+
+  /* Tables are written as bare elements throughout the app. Note there is deliberately no
+     white-space: nowrap here: the old rule turned every table into a horizontal scroll
+     slab on a phone. Cells that genuinely must not wrap opt in per column. */
+  table {
+    @apply w-full border-collapse text-sm;
+  }
+  th,
+  td {
+    @apply border-b border-border px-3.5 py-3 text-left;
+  }
+  th {
+    @apply bg-secondary text-xs font-bold tracking-wider text-muted-foreground uppercase;
+  }
+  tr:last-child td {
+    @apply border-b-0;
+  }
 }
