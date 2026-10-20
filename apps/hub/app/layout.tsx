@@ -1,21 +1,28 @@
 import type { Metadata, Viewport } from 'next';
-import { JetBrains_Mono, Manrope } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
 import RegisterServiceWorker from '../components/RegisterServiceWorker';
 import { BRAND } from '../lib/brand';
 
-// Self-hosted at build time, so the hub does not block first paint on fonts.googleapis.com
-// — which matters because it is usually behind a VPN or a locked-down network.
-const manrope = Manrope({
-  subsets: ['latin'],
-  weight: ['400', '600', '700', '800'],
+// The font files live in the repo and are loaded with next/font/local, not
+// next/font/google. next/font/google downloads from fonts.googleapis.com *at build time*,
+// which fails on a hub that has no outbound access to Google — the build dies with
+// "An error occurred in next/font". Keeping the files local means neither the build nor
+// the browser ever needs to reach Google.
+//
+// Both are variable fonts, so one file covers the whole weight range.
+const manrope = localFont({
+  src: './fonts/manrope-latin.woff2',
+  weight: '400 800',
+  style: 'normal',
   variable: '--font-manrope',
   display: 'swap',
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  weight: ['400', '500'],
+const jetbrainsMono = localFont({
+  src: './fonts/jetbrains-mono-latin.woff2',
+  weight: '400 500',
+  style: 'normal',
   variable: '--font-jetbrains',
   display: 'swap',
 });
