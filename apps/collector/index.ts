@@ -1,6 +1,8 @@
 #!/usr/bin/env node
-// Helm collector. Runs on each server under PM2.
-// Every HELM_INTERVAL_SEC it sends PM2 process state and new error lines from the log files to the hub.
+// Helm collector. Runs on each server under PM2 — one per server, not one per project.
+// Every HELM_INTERVAL_SEC it sends PM2 process state and new error lines from the log files to
+// the hub, which splits them across the projects on this machine by the PM2 process names and
+// log paths each project declares. List every project's log files in HELM_LOG_FILES.
 //
 // Built with `npm run build:collector` into dist/index.js, which is the single plain-JS
 // file you copy to the server — the server itself needs no TypeScript toolchain.
@@ -10,6 +12,7 @@
 
 import { execFile } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
 
 interface Pm2Entry {
   name: string;
@@ -88,7 +91,7 @@ function newErrors(): ErrorLine[] {
 }
 
 async function push(): Promise<void> {
-  const body = { pm2: await pm2List(), errors: newErrors() };
+  const body = { host: os.hostname(), pm2: await pm2List(), errors: newErrors() };
   try {
     const res = await fetch(`${HUB}/api/ingest`, {
       method: 'POST',

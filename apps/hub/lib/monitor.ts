@@ -6,6 +6,7 @@ import { listProjects, getProject, getStatus, setStatus } from './store';
 import { decrypt } from './crypto';
 import { evaluateHealth, evaluatePm2, evaluateSsl, evaluateDb } from './alerts';
 import type {
+  CollectorErrorLine,
   CollectorPayload,
   CollectorStatus,
   DbReachability,
@@ -196,32 +197,89 @@ export async function checkAll(): Promise<void> {
 }
 
 // Collector push: PM2 state and recent error lines from a server.
+//
+// One collector runs per server and reports everything on that machine, but a server often
+// hosts several projects. So the payload is split up here rather than dumped onto whichever
+// project owns the token: each project takes the PM2 processes it names in
+// pm2_process_names and the errors from the files it names in log_paths.
+//
+// Anything no project claims falls to the token's own project, which keeps a project that
+// has not filled those fields in working exactly as before.
+//
+// A project is only written to when something in this payload belongs to it. That matters
+// once there is more than one server: a push from server B must not blank out the status of
+// a project living on server A.
 export async function recordCollector(slug: string, payload: CollectorPayload): Promise<void> {
-  const prev = getStatus(slug);
-  const project = getProject(slug);
   const now = new Date().toISOString();
+  const host = String(payload.host || '').slice(0, 200);
 
-  const pm2: Pm2Process[] = (Array.isArray(payload.pm2) ? payload.pm2 : []).slice(0, 50).map((p) => ({
+  const pm2All: Pm2Process[] = (Array.isArray(payload.pm2) ? payload.pm2 : []).slice(0, 200).map((p) => ({
     name: String(p.name || '').slice(0, 100),
     status: String(p.status || 'unknown').slice(0, 20),
     restarts: Number(p.restarts) || 0,
     uptimeMs: Number(p.uptimeMs) || 0,
   }));
 
-  const incoming = (Array.isArray(payload.errors) ? payload.errors : []).slice(0, 50).map((e) => ({
+  const errorsAll: CollectorErrorLine[] = (Array.isArray(payload.errors) ? payload.errors : []).slice(0, 100).map((e) => ({
     at: now,
     file: String(e.file || '').slice(0, 200),
     line: String(e.line || '').slice(0, 500),
   }));
 
-  const errors = [...(prev?.collector?.errors || []), ...incoming].slice(-100);
-  const collector: CollectorStatus = { at: now, pm2, errors };
-  const base: ProjectStatusRecord =
-    prev ?? { state: 'unknown', checkedAt: new Date(0).toISOString(), checks: [], collector: null, ssl: {}, sslCheckedAt: null, db: null };
-  setStatus(slug, { ...base, collector });
+  const projects = listProjects();
 
-  if (project) await evaluatePm2(project, pm2, prev?.collector?.pm2 || []);
+  // What each project has asked for by name.
+  const claimedProcess = new Set<string>();
+  const claimedFile = new Set<string>();
+  for (const p of projects) {
+    for (const n of p.pm2_process_names || []) claimedProcess.add(n);
+    for (const f of p.log_paths || []) claimedFile.add(f);
+  }
+
+  const shareFor = (project: Project) => {
+    const names = project.pm2_process_names || [];
+    const files = project.log_paths || [];
+    const isTokenProject = project.slug === slug;
+
+    // Named processes go to the project that named them. A project that named none, and
+    // owns the token, picks up whatever nobody else claimed.
+    const pm2 = names.length
+      ? pm2All.filter((x) => names.includes(x.name))
+      : isTokenProject
+        ? pm2All.filter((x) => !claimedProcess.has(x.name))
+        : [];
+
+    const errors = files.length
+      ? errorsAll.filter((e) => files.includes(e.file))
+      : isTokenProject
+        ? errorsAll.filter((e) => !claimedFile.has(e.file))
+        : [];
+
+    return { pm2, errors };
+  };
+
+  for (const project of projects) {
+    const { pm2, errors } = shareFor(project);
+    // Nothing here belongs to this project — leave its status untouched.
+    if (pm2.length === 0 && errors.length === 0) continue;
+
+    const prev = getStatus(project.slug);
+    const collector: CollectorStatus = {
+      at: now,
+      host,
+      pm2,
+      errors: [...(prev?.collector?.errors || []), ...errors].slice(-100),
+    };
+    const base: ProjectStatusRecord =
+      prev ?? { state: 'unknown', checkedAt: new Date(0).toISOString(), checks: [], collector: null, ssl: {}, sslCheckedAt: null, db: null };
+    setStatus(project.slug, { ...base, collector });
+
+    // Alerts see only this project's processes, so a crash is reported against the project
+    // that actually owns it.
+    if (pm2.length) await evaluatePm2(project, pm2, prev?.collector?.pm2 || []);
+  }
 }
+
 
 export function startMonitor(): void {
   if (globalThis.__helmMonitorStarted) return;

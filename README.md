@@ -141,25 +141,52 @@ reachable directly on port 3100 from outside the server.
 
 ## Install the collector on a server
 
+Run **one collector per server, not one per project**. It reports everything on the machine,
+and the hub splits that across the projects living there.
+
 The collector is written in TypeScript but ships as a single plain JavaScript file, so the
-server it runs on needs nothing beyond Node.js and PM2 — no TypeScript toolchain.
+server it runs on needs nothing beyond Node.js and PM2 — no TypeScript toolchain, no
+`npm install`.
 
 ```bash
 npm run build:collector                        # compiles apps/collector/index.ts -> dist/index.js
 scp apps/collector/dist/index.js your-server:/opt/helm-collector/index.js
 ```
 
-Then on that server:
+Then on that server, listing every project's log files:
 
 ```bash
 HELM_HUB_URL=https://helm.example.com \
 HELM_COLLECTOR_TOKEN=hlm_... \
-HELM_LOG_FILES=/var/www/app/logs/error.log \
+HELM_LOG_FILES=/var/www/shop/logs/error.log,/var/www/blog/logs/error.log \
 pm2 start /opt/helm-collector/index.js --name helm-collector
+pm2 save                                       # survive a reboot
 ```
 
 It needs `pm2` on the PATH. For local testing without a build step, `npm run collector:dev`
 runs the TypeScript source directly via `tsx`.
+
+### Several projects on one server
+
+The collector sends every PM2 process and every matching log line it can see. The hub hands
+each project only what it has claimed, using two fields in the project's settings:
+
+- **PM2 process names** — the processes belonging to this project
+- **Log file paths** — the log files belonging to this project
+
+So a box running `shop-api`, `blog-web` and `crm-api` needs one collector, and each project
+sees only its own process. A crash in `crm-api` raises an alert against CRM, not against
+whichever project happens to own the collector's token.
+
+Anything no project claims — an unrelated worker, a log file nobody listed — goes to the
+project whose token the collector uses. That means a project with both fields left empty
+keeps seeing everything, as it did before, so existing installs need no changes.
+
+The token authenticates the push rather than scoping it: a collector updates every project
+whose processes it reports, so treat the token as belonging to the server.
+
+Only projects mentioned in a push are touched, so a collector on one server never blanks out
+the status of a project running on another.
 
 ## Layout
 

@@ -35,6 +35,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
   const status = getStatus(slug);
   const state = status?.state || 'unknown';
   const pm2 = status?.collector?.pm2 || [];
+  const collectorHost = status?.collector?.host;
   const errors = (status?.collector?.errors || []).slice().reverse().slice(0, 50);
   const clientName = clientNameFor(project);
 
@@ -80,10 +81,17 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
         </div>
 
         <div className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0">
-          <h2 className="mb-1.5">Server processes</h2>
+          <div className="mb-1.5 flex flex-wrap items-baseline justify-between gap-2">
+            <h2>Server processes</h2>
+            {collectorHost ? (
+              <span className="font-mono text-[13px] text-muted-foreground">{collectorHost}</span>
+            ) : null}
+          </div>
           {pm2.length === 0 ? (
             <p className="text-muted-foreground text-sm mt-3">
-              No collector data yet. Install the collector on the server to see PM2 state.
+              No collector data yet. Install one collector on the server, then list this project&rsquo;s
+              PM2 process names in its settings so Helm knows which of that machine&rsquo;s processes are
+              yours.
             </p>
           ) : (
             <div className="mt-3">

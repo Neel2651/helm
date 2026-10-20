@@ -88,6 +88,8 @@ export interface CollectorStatus {
   at: string;
   pm2: Pm2Process[];
   errors: CollectorErrorLine[];
+  /** Hostname the collector reported from. Shown so a shared server is identifiable. */
+  host?: string;
 }
 
 export interface HealthCheckResult {
@@ -184,4 +186,6 @@ export interface HelmDb {
 export interface CollectorPayload {
   pm2?: Array<{ name?: string; status?: string; restarts?: number; uptimeMs?: number }>;
   errors?: Array<{ file?: string; line?: string }>;
+  /** os.hostname() of the machine the collector runs on. */
+  host?: string;
 }
