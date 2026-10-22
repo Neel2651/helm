@@ -112,7 +112,6 @@ export async function saveProject(originalSlug: string | null, formData: FormDat
     database: {
       type: (text(formData, 'db_type') || 'mongodb') as Project['database']['type'],
       user: text(formData, 'db_user'),
-      collections: list(formData.get('collections')),
       url_enc: dbUrl ? encrypt(dbUrl) : existing?.database?.url_enc || '',
       password_enc: dbPassword ? encrypt(dbPassword) : existing?.database?.password_enc || '',
     },

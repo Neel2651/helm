@@ -26,7 +26,6 @@ export interface Integration {
 export interface ProjectDatabase {
   type: DbType;
   user: string;
-  collections: string[];
   url_enc: string;
   password_enc: string;
 }

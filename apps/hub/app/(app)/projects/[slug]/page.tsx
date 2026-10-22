@@ -14,6 +14,7 @@ import { StateBadge, timeAgo, formatUptime } from '../../../../components/displa
 import BackupStatus from '../../../../components/BackupStatus';
 import ProjectForm from '../../../../components/ProjectForm';
 import TokenButton from '../../../../components/TokenButton';
+import RevealValue from '../../../../components/RevealValue';
 import { saveProject, removeProject, addIntegration, removeIntegration, runBackupNow } from '../../../actions';
 import { Alert } from '@/components/ui/alert';
 import Truncate from '@/components/Truncate';
@@ -212,7 +213,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
 
         <div className="rounded-lg border border-border bg-card p-4.5 shadow-sm min-w-0 flex flex-col gap-3">
           <h2>Integration keys</h2>
-          <p className="text-muted-foreground text-sm">Encrypted. Only the last four characters are shown.</p>
+          <p className="text-muted-foreground text-sm">Encrypted. Masked by default; reveal one to copy it.</p>
           {(project.integrations || []).length === 0 ? (
             <p className="text-muted-foreground text-sm">None added.</p>
           ) : (
@@ -220,9 +221,10 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
               <div key={i.id} className="flex justify-between gap-3 border-b border-dashed border-border py-1.5 text-sm last:border-b-0 [&>span:first-child]:text-muted-foreground items-center">
                 <span className="grow min-w-0">
                   <Truncate className="font-semibold text-foreground">{i.label}</Truncate>
-                  <Truncate className="font-mono text-[13px] text-muted-foreground">
-                    {i.key_name} · {maskSecret(i.value_enc)}
-                  </Truncate>
+                  <span className="flex min-w-0 items-center gap-1.5 font-mono text-[13px] text-muted-foreground">
+                    <Truncate>{i.key_name} · {maskSecret(i.value_enc)}</Truncate>
+                    <RevealValue slug={project.slug} id={i.id} label={`${i.label} (${i.key_name})`} />
+                  </span>
                 </span>
                 <form action={removeIntegration.bind(null, project.slug, i.id)}>
                   <Button type="submit" variant="destructive" size="sm">Remove</Button>

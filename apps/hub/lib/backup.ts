@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { execFile } from 'node:child_process';
-import { getProject, addBackupRun, updateBackupRun } from './store';
+import { getProject, addBackupRun, updateBackupRun, allBackupRuns } from './store';
 import { decrypt, encryptBuffer } from './crypto';
 import { driveConfigured, driveNeedsReconnect, ensureFolderPath, uploadBackup, deleteOldBackups } from './drive';
 import { evaluateBackup } from './alerts';
@@ -15,7 +15,11 @@ const DUMP_TIMEOUT_MS = 60 * 60 * 1000;
 
 function run(cmd: string, args: string[], timeoutMs: number): Promise<string> {
   return new Promise((resolve, reject) => {
-    execFile(cmd, args, { timeout: timeoutMs, maxBuffer: 20 * 1024 * 1024 }, (err, stdout, stderr) => {
+    // killSignal defaults to SIGTERM, which a process can catch, delay, or (for a child it
+    // spawned itself, like mongodump's connection handling) simply not act on promptly. A
+    // mongodump stuck waiting on a paused/unreachable Atlas cluster can sit past its deadline
+    // for hours with SIGTERM alone. SIGKILL cannot be caught or ignored, so the timeout is real.
+    execFile(cmd, args, { timeout: timeoutMs, killSignal: 'SIGKILL', maxBuffer: 20 * 1024 * 1024 }, (err, stdout, stderr) => {
       if (err) {
         const reason =
           (err as NodeJS.ErrnoException).code === 'ENOENT' ? 'is not installed on the hub machine' : (stderr || err.message).trim().slice(0, 300);
@@ -28,7 +32,9 @@ function run(cmd: string, args: string[], timeoutMs: number): Promise<string> {
 
 async function dumpDatabase(type: DbType, url: string, file: string): Promise<void> {
   if (type === 'mongodb') {
-    // Whole database as a gzipped archive. Per-collection dumps are not done yet.
+    // The whole database as one gzipped archive — every collection, deliberately. There's
+    // no per-collection scoping, so nothing has to be kept in sync with what's actually in
+    // the database as collections are added.
     await run('mongodump', ['--uri', url, '--gzip', `--archive=${file}`], DUMP_TIMEOUT_MS);
     return;
   }
@@ -46,6 +52,24 @@ async function dumpDatabase(type: DbType, url: string, file: string): Promise<vo
 // Keep secrets out of logs and error messages shown in the UI.
 function redact(message: string, secrets: Array<string | undefined>): string {
   return secrets.filter((s): s is string => Boolean(s)).reduce((msg, s) => msg.split(s).join('[redacted]'), message);
+}
+
+/**
+ * Marks any backup run still "running" as failed. Call once when the hub boots.
+ *
+ * The `running` guard above is an in-memory Set, so it always starts empty on a fresh
+ * process — nothing can legitimately still be "running" from before this boot. A record
+ * stuck at "running" was orphaned by the hub stopping mid-backup (a deploy, a crash), and
+ * without this it stays stuck forever, since nothing else ever calls finish() for it.
+ */
+export async function recoverStaleBackups(): Promise<void> {
+  const error = 'Interrupted: the hub restarted while this backup was running.';
+  for (const run of allBackupRuns()) {
+    if (run.status !== 'running' || !run.slug) continue;
+    updateBackupRun(run.slug, run.id, { status: 'failed', finishedAt: new Date().toISOString(), error });
+    const project = getProject(run.slug);
+    if (project) await evaluateBackup(project, { status: 'failed', error });
+  }
 }
 
 export interface StartedBackup {

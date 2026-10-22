@@ -175,9 +175,6 @@ export default function ProjectForm({ project, action, submitLabel = 'Save proje
         <Field label="Password" htmlFor="db_password">
           <Input id="db_password" type="password" name="db_password" autoComplete="new-password" placeholder={db.password_enc ? 'Saved. Leave blank to keep.' : ''} />
         </Field>
-        <Field label="Collections or tables" htmlFor="collections" hint="Comma-separated">
-          <Input id="collections" name="collections" defaultValue={(db.collections || []).join(', ')} placeholder="contacts, bookings" className="font-mono text-base md:text-[13px]" />
-        </Field>
       </Section>
 
       <Section title="Backups" hint="Dump, zip and upload to Google Drive on this schedule.">
