@@ -27,6 +27,16 @@ export function StateBadge({ state = 'unknown' as HealthState }: { state?: Healt
   );
 }
 
+// Shown in place of StateBadge when a project is not being monitored (paused/archived, or its
+// client is inactive). `reason` comes from monitoringPausedReason() in lib/store.ts.
+export function PausedBadge({ reason }: { reason: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-unknown-soft px-2.5 py-0.5 text-xs font-bold whitespace-nowrap text-unknown before:size-1.5 before:rounded-full before:bg-current">
+      {reason}
+    </span>
+  );
+}
+
 export function timeAgo(iso: string | null | undefined): string {
   if (!iso) return 'never';
   const seconds = Math.round((Date.now() - new Date(iso).getTime()) / 1000);

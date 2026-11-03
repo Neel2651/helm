@@ -14,11 +14,14 @@ import {
   upsertClient,
   deleteClient,
   projectsForClient,
+  getServer,
+  upsertServer,
+  deleteServer,
 } from '../lib/store';
 import { startBackup } from '../lib/backup';
 import { disconnectDrive, driveStatus } from '../lib/drive';
 import { notify } from '../lib/notify';
-import type { HealthEndpoint, Project, ProjectLifecycleStatus } from '../lib/types';
+import type { ClientStatus, HealthEndpoint, Project, ProjectLifecycleStatus, Server } from '../lib/types';
 
 const COOKIE = 'helm_session';
 
@@ -205,10 +208,13 @@ export async function saveClient(id: string | null, formData: FormData): Promise
     email: text(formData, 'email'),
     phone: text(formData, 'phone'),
     notes: text(formData, 'notes'),
+    status: (text(formData, 'status') || 'active') as ClientStatus,
     createdAt: existing?.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   });
 
+  // 'layout' so the overview/projects/backups badges re-reflect the active/inactive change,
+  // and the scheduler picks it up on its next reconcile.
   revalidatePath('/clients');
   revalidatePath('/', 'layout');
   redirect(`/clients/${clientId}`);
@@ -224,6 +230,49 @@ export async function removeClient(id: string): Promise<void> {
   deleteClient(id);
   revalidatePath('/clients');
   redirect('/clients');
+}
+
+// Create (id = null) or update a server. Blank password/SSH key keep the stored value.
+export async function saveServer(id: string | null, formData: FormData): Promise<void> {
+  const name = text(formData, 'name');
+  if (!name) throw new Error('Server name is required.');
+
+  const existing = id ? getServer(id) : null;
+  const serverId = id || crypto.randomUUID();
+
+  const password = text(formData, 'password');
+  const sshKey = String(formData.get('ssh_key') || '').trim();
+
+  const data: Server = {
+    id: serverId,
+    name,
+    url: text(formData, 'url'),
+    login_username: text(formData, 'login_username'),
+    password_enc: password ? encrypt(password) : existing?.password_enc || '',
+    ssh_key_enc: sshKey ? encrypt(sshKey) : existing?.ssh_key_enc || '',
+    clientIds: formData.getAll('client_ids').map((v) => String(v)).filter(Boolean),
+    os: text(formData, 'os'),
+    processor: text(formData, 'processor'),
+    ram: text(formData, 'ram'),
+    storage: text(formData, 'storage'),
+    provider: text(formData, 'provider'),
+    renewalDate: text(formData, 'renewalDate'),
+    cost: text(formData, 'cost'),
+    notes: text(formData, 'notes'),
+    createdAt: existing?.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  upsertServer(data);
+  revalidatePath('/servers');
+  revalidatePath('/', 'layout');
+  redirect(`/servers/${serverId}`);
+}
+
+export async function removeServer(id: string): Promise<void> {
+  deleteServer(id);
+  revalidatePath('/servers');
+  redirect('/servers');
 }
 
 // --- Google Drive connection ------------------------------------------------------------

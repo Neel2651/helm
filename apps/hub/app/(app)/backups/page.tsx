@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { listProjects, allBackupRuns, listBackupRuns } from '../../../lib/store';
+import { listProjects, allBackupRuns, listBackupRuns, monitoringPausedReason } from '../../../lib/store';
 import { driveConfigured, driveNeedsReconnect } from '../../../lib/drive';
 import { runBackupNow } from '../../actions';
 import { timeAgo } from '../../../components/display';
@@ -92,12 +92,15 @@ export default async function BackupsPage({ searchParams }: BackupsPageProps) {
             <tbody>
               {enabled.map((p) => {
                 const last = listBackupRuns(p.slug)[0];
+                const paused = monitoringPausedReason(p);
                 return (
                   <tr key={p.slug}>
                     <td><Link href={`/projects/${p.slug}`}><strong>{p.name}</strong></Link></td>
                     <td className="font-mono text-[13px] text-muted-foreground">{p.backup.cron}</td>
                     <td>
-                      {last ? (
+                      {paused ? (
+                        <span className="text-muted-foreground text-sm">Paused ({paused.toLowerCase()})</span>
+                      ) : last ? (
                         <span className="flex items-center gap-2">
                           <BackupStatus status={last.status} />
                           <span className="text-muted-foreground text-sm">{timeAgo(last.startedAt)}</span>
@@ -112,7 +115,7 @@ export default async function BackupsPage({ searchParams }: BackupsPageProps) {
                     <td className="text-right">
                       <form action={runBackupNow.bind(null, p.slug)}>
                         <input type="hidden" name="returnTo" value="/backups" />
-                        <Button type="submit" variant="outline" size="sm" disabled={!driveConfigured() || driveNeedsReconnect()}>Run now</Button>
+                        <Button type="submit" variant="outline" size="sm" disabled={!driveConfigured() || driveNeedsReconnect() || Boolean(paused)}>Run now</Button>
                       </form>
                     </td>
                   </tr>

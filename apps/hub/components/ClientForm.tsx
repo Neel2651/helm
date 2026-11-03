@@ -3,6 +3,7 @@ import type { Client } from '../lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 
 interface ClientFormProps {
@@ -33,6 +34,21 @@ export default function ClientForm({ client, action, submitLabel = 'Save client'
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="phone">Phone</Label>
           <Input id="phone" type="tel" name="phone" defaultValue={d.phone || ''} className="font-mono text-base md:text-[13px]" />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="status">Status</Label>
+          <Select name="status" defaultValue={d.status || 'active'}>
+            <SelectTrigger id="status" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
+          </Select>
+          <span className="text-xs text-muted-foreground">
+            Inactive pauses monitoring and backups for all this client&rsquo;s projects.
+          </span>
         </div>
         <div className="col-span-full flex flex-col gap-1.5">
           <Label htmlFor="notes">Notes</Label>

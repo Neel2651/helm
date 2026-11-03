@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { listProjects, getAllStatus, listAlerts } from '../../lib/store';
-import { StateBadge, timeAgo } from '../../components/display';
+import { listProjects, getAllStatus, listAlerts, monitoringPausedReason } from '../../lib/store';
+import { StateBadge, PausedBadge, timeAgo } from '../../components/display';
 import type { HealthState } from '../../lib/types';
 import { Button } from '@/components/ui/button';
 
@@ -16,7 +16,9 @@ export default function OverviewPage() {
   const cutoff = Date.now() - 60 * 60 * 1000;
 
   for (const project of projects) {
-    counts[statuses[project.slug]?.state || 'unknown'] += 1;
+    // Paused/inactive projects aren't being checked, so their stale state shouldn't count
+    // toward up/degraded/down.
+    if (!monitoringPausedReason(project)) counts[statuses[project.slug]?.state || 'unknown'] += 1;
     for (const e of statuses[project.slug]?.collector?.errors || []) {
       if (new Date(e.at).getTime() >= cutoff) errorsLastHour += 1;
     }
@@ -76,16 +78,17 @@ export default function OverviewPage() {
         <section className="grid grid-projects gap-4">
           {projects.map((project) => {
             const status = statuses[project.slug];
+            const paused = monitoringPausedReason(project);
             const state = status?.state || 'unknown';
             const pm2 = status?.collector?.pm2 || [];
             return (
-              <Link key={project.slug} href={`/projects/${project.slug}`} className={`flex min-w-0 flex-col gap-3 rounded-lg border bg-card p-4.5 text-inherit shadow-sm hover:border-input hover:no-underline ${state === 'down' ? 'border-down-border' : 'border-border'}`}>
+              <Link key={project.slug} href={`/projects/${project.slug}`} className={`flex min-w-0 flex-col gap-3 rounded-lg border bg-card p-4.5 text-inherit shadow-sm hover:border-input hover:no-underline ${!paused && state === 'down' ? 'border-down-border' : 'border-border'}`}>
                 <div className="flex items-center gap-3 justify-between">
                   <div>
                     <strong className="text-base">{project.name}</strong>
                     <div className="text-muted-foreground text-sm font-mono text-[13px]">{project.fe_url || project.slug}</div>
                   </div>
-                  <StateBadge state={state} />
+                  {paused ? <PausedBadge reason={paused} /> : <StateBadge state={state} />}
                 </div>
 
                 <div className="flex flex-col gap-1.5">

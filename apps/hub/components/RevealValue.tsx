@@ -13,16 +13,17 @@ import {
 } from '@/components/ui/dialog';
 
 interface RevealValueProps {
-  slug: string;
-  id: string;
+  /** POST endpoint that returns `{ value }` with the decrypted secret. */
+  endpoint: string;
   label: string;
 }
 
 /**
- * "Reveal" next to a masked integration value. Fetches the decrypted value only once the
- * dialog is actually opened — not on page render — and never caches it past that.
+ * "Reveal" next to a masked secret. Fetches the decrypted value only once the dialog is
+ * actually opened — not on page render — and never caches it past that. Used for integration
+ * keys and server credentials; the caller supplies the reveal endpoint.
  */
-export default function RevealValue({ slug, id, label }: RevealValueProps) {
+export default function RevealValue({ endpoint, label }: RevealValueProps) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -40,7 +41,7 @@ export default function RevealValue({ slug, id, label }: RevealValueProps) {
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch(`/api/projects/${slug}/integrations/${id}/reveal`, { method: 'POST' });
+      const res = await fetch(endpoint, { method: 'POST' });
       if (!res.ok) throw new Error(`Request failed (${res.status})`);
       const body: { value: string } = await res.json();
       setValue(body.value);

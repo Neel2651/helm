@@ -27,6 +27,7 @@ export default function ClientsPage() {
             <thead>
               <tr>
                 <th>Name</th>
+                <th>Status</th>
                 <th>Company</th>
                 <th>Email</th>
                 <th>Phone</th>
@@ -36,9 +37,15 @@ export default function ClientsPage() {
             <tbody>
               {clients.map((c) => {
                 const projects = projectsForClient(c.id);
+                const inactive = c.status === 'inactive';
                 return (
                   <tr key={c.id}>
                     <td><Link href={`/clients/${c.id}`}><strong>{c.name}</strong></Link></td>
+                    <td>
+                      <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold whitespace-nowrap before:size-1.5 before:rounded-full before:bg-current ${inactive ? 'bg-unknown-soft text-unknown' : 'bg-up-soft text-up'}`}>
+                        {inactive ? 'Inactive' : 'Active'}
+                      </span>
+                    </td>
                     <td className="text-muted-foreground">{c.company || '—'}</td>
                     <td className="font-mono text-[13px] text-muted-foreground text-sm">{c.email || '—'}</td>
                     <td className="font-mono text-[13px] text-muted-foreground text-sm">{c.phone || '—'}</td>

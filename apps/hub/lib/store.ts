@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import type { Alert, BackupRun, Client, GoogleDriveAuth, HelmDb, Project, ProjectStatusRecord } from './types';
+import type { Alert, BackupRun, Client, GoogleDriveAuth, HelmDb, Project, ProjectStatusRecord, Server } from './types';
 
 // JSON file store for the MVP. Swap for Postgres (Drizzle) when the hub moves to a server.
 const FILE = process.env.HELM_DATA_FILE || path.join(process.cwd(), 'data', 'helm.json');
@@ -14,10 +14,11 @@ function read(): HelmDb {
       backups: parsed.backups || {},
       alerts: parsed.alerts || [],
       clients: parsed.clients || {},
+      servers: parsed.servers || {},
       settings: parsed.settings || {},
     };
   } catch {
-    return { projects: {}, status: {}, backups: {}, alerts: [], clients: {}, settings: {} };
+    return { projects: {}, status: {}, backups: {}, alerts: [], clients: {}, servers: {}, settings: {} };
   }
 }
 
@@ -133,6 +134,49 @@ export function projectsForClient(id: string): Project[] {
 export function clientNameFor(project: Project): string | null {
   if (project.clientId) return getClient(project.clientId)?.name || null;
   return project.client || null;
+}
+
+// The shared gate for monitoring and backups. A project is only watched/backed up when it is
+// active AND its linked client (if any) is not inactive. Both the health checker and the backup
+// scheduler consult this, so pausing a project or deactivating a client stops all of it at once,
+// reversibly — nothing on the project record is changed.
+export function monitoringEnabled(project: Project): boolean {
+  if (project.status !== 'active') return false;
+  if (project.clientId && getClient(project.clientId)?.status === 'inactive') return false;
+  return true;
+}
+
+// Why a project is not being monitored, for the UI badge. null when it is monitored.
+export function monitoringPausedReason(project: Project): string | null {
+  if (project.status === 'paused') return 'Paused';
+  if (project.status === 'archived') return 'Archived';
+  if (project.clientId && getClient(project.clientId)?.status === 'inactive') return 'Client inactive';
+  return null;
+}
+
+// Servers.
+export function listServers(): Server[] {
+  return Object.values(read().servers).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export function getServer(id: string): Server | null {
+  return read().servers[id] || null;
+}
+
+export function upsertServer(data: Server): void {
+  const db = read();
+  db.servers[data.id] = data;
+  write(db);
+}
+
+export function deleteServer(id: string): void {
+  const db = read();
+  delete db.servers[id];
+  write(db);
+}
+
+export function serversForClient(clientId: string): Server[] {
+  return listServers().filter((s) => (s.clientIds || []).includes(clientId));
 }
 
 export function getStatus(slug: string): ProjectStatusRecord | null {

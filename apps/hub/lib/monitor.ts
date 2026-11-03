@@ -2,7 +2,7 @@ import tls from 'node:tls';
 import net from 'node:net';
 import dns from 'node:dns';
 import fs from 'node:fs/promises';
-import { listProjects, getProject, getStatus, setStatus } from './store';
+import { listProjects, getStatus, setStatus, monitoringEnabled } from './store';
 import { decrypt } from './crypto';
 import { evaluateHealth, evaluatePm2, evaluateSsl, evaluateDb } from './alerts';
 import type {
@@ -188,6 +188,9 @@ export async function checkProject(project: Project): Promise<void> {
 
 export async function checkAll(): Promise<void> {
   for (const project of listProjects()) {
+    // Paused/archived projects and those of an inactive client are skipped entirely — their
+    // last status record is left as-is (it simply goes stale) rather than flipped.
+    if (!monitoringEnabled(project)) continue;
     try {
       await checkProject(project);
     } catch (err) {

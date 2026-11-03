@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { listProjects, getAllStatus, clientNameFor } from '../../../lib/store';
-import { StateBadge, timeAgo } from '../../../components/display';
+import { listProjects, getAllStatus, clientNameFor, monitoringPausedReason } from '../../../lib/store';
+import { StateBadge, PausedBadge, timeAgo } from '../../../components/display';
 import { Button } from '@/components/ui/button';
 import Truncate from '@/components/Truncate';
 
@@ -41,6 +41,7 @@ export default function ProjectsPage() {
               {projects.map((p) => {
                 const s = statuses[p.slug];
                 const clientName = clientNameFor(p);
+                const paused = monitoringPausedReason(p);
                 return (
                   <tr key={p.slug}>
                     <td>
@@ -53,7 +54,7 @@ export default function ProjectsPage() {
                         )
                       ) : null}
                     </td>
-                    <td><StateBadge state={s?.state || 'unknown'} /></td>
+                    <td>{paused ? <PausedBadge reason={paused} /> : <StateBadge state={s?.state || 'unknown'} />}</td>
                     <td className="font-mono text-[13px] text-muted-foreground">{p.fe_url || '—'}</td>
                     <td className="font-mono text-[13px] text-muted-foreground">
                       <div className="max-w-48">

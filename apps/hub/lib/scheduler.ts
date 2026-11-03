@@ -1,5 +1,5 @@
 import cron, { type ScheduledTask } from 'node-cron';
-import { listProjects } from './store';
+import { listProjects, monitoringEnabled } from './store';
 import { startBackup } from './backup';
 
 interface ScheduleEntry {
@@ -14,7 +14,11 @@ export function syncSchedules(): void {
   const wanted = new Map<string, string>();
   for (const project of listProjects()) {
     const expr = project.backup?.cron;
-    if (project.backup?.enabled && expr && cron.validate(expr)) wanted.set(project.slug, expr);
+    // monitoringEnabled gates backups too: a paused project or inactive client's cron is
+    // dropped here, and the reconcile loop below stops any task already running for it.
+    if (project.backup?.enabled && monitoringEnabled(project) && expr && cron.validate(expr)) {
+      wanted.set(project.slug, expr);
+    }
   }
 
   for (const [slug, entry] of tasks) {

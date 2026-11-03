@@ -10,6 +10,7 @@ export const LINKS = [
   { href: '/backups', label: 'Backups' },
   { href: '/alerts', label: 'Alerts' },
   { href: '/clients', label: 'Clients' },
+  { href: '/servers', label: 'Servers' },
   { href: '/settings', label: 'Settings' },
 ];
 

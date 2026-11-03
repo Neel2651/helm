@@ -2,6 +2,7 @@
 // almost every other file in the hub reads or writes one of these.
 
 export type ProjectLifecycleStatus = 'active' | 'paused' | 'archived';
+export type ClientStatus = 'active' | 'inactive';
 export type DbType = 'mongodb' | 'postgres' | 'mysql' | 'sqlite';
 export type HealthState = 'up' | 'degraded' | 'down' | 'unknown';
 export type AlertSeverity = 'critical' | 'warning';
@@ -65,6 +66,36 @@ export interface Client {
   company: string;
   email: string;
   phone: string;
+  notes: string;
+  /**
+   * Missing on records saved before this field existed; treated as 'active' everywhere
+   * (use sites check `=== 'inactive'`), so no migration is needed. Setting a client inactive
+   * pauses monitoring and backups for all its projects — see monitoringEnabled() in store.ts.
+   */
+  status?: ClientStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * A purchased server/VPS. Reference details plus credentials; Helm does not connect to these,
+ * it just keeps them in one place. password_enc and ssh_key_enc are encrypted (lib/crypto.ts).
+ */
+export interface Server {
+  id: string;
+  name: string;
+  url: string;
+  login_username: string;
+  password_enc: string;
+  ssh_key_enc: string;
+  clientIds: string[];
+  os: string;
+  processor: string;
+  ram: string;
+  storage: string;
+  provider: string;
+  renewalDate: string;
+  cost: string;
   notes: string;
   createdAt: string;
   updatedAt: string;
@@ -178,6 +209,7 @@ export interface HelmDb {
   backups: Record<string, BackupRun[]>;
   alerts: Alert[];
   clients: Record<string, Client>;
+  servers: Record<string, Server>;
   settings: HelmSettings;
 }
 

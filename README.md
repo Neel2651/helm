@@ -9,7 +9,8 @@ One private dashboard to monitor, back up and configure every project. [MIT lice
 
 - **Overview:** status of every project (frontend, backend, health endpoints), PM2 state and recent errors.
 - **Projects:** per-project settings. Secrets are encrypted at rest and shown masked.
-- **Clients:** who each project is for, with contact details and notes.
+- **Clients:** who each project is for, with contact details and notes. Marking a client inactive pauses monitoring and backups for all its projects (reversible — reactivating restores them).
+- **Servers:** purchased servers with panel URL, login, SSH key, hardware spec, renewal date and notes, tagged with the clients they serve. Password and SSH key are encrypted and reveal/copyable.
 - **Backups:** scheduled, encrypted database dumps uploaded to Google Drive.
 - **Alerts:** Telegram messages for outages, PM2 errors, failed backups, and expiring TLS certificates.
 - **Collector:** a small script on each server that sends PM2 state and error log lines to Helm.

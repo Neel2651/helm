@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getProject, getStatus, listBackupRuns, clientNameFor } from '../../../../lib/store';
+import { getProject, getStatus, listBackupRuns, clientNameFor, monitoringPausedReason } from '../../../../lib/store';
 import { maskSecret } from '../../../../lib/crypto';
 import { driveConfigured } from '../../../../lib/drive';
 import { ChevronDownIcon } from 'lucide-react';
@@ -10,7 +10,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { StateBadge, timeAgo, formatUptime } from '../../../../components/display';
+import { StateBadge, PausedBadge, timeAgo, formatUptime } from '../../../../components/display';
 import BackupStatus from '../../../../components/BackupStatus';
 import ProjectForm from '../../../../components/ProjectForm';
 import TokenButton from '../../../../components/TokenButton';
@@ -39,6 +39,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
   const collectorHost = status?.collector?.host;
   const errors = (status?.collector?.errors || []).slice().reverse().slice(0, 50);
   const clientName = clientNameFor(project);
+  const paused = monitoringPausedReason(project);
 
   return (
     <>
@@ -47,7 +48,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
           <div className="text-muted-foreground text-sm"><Link href="/projects">Projects</Link> / {project.slug}</div>
           <div className="flex items-center gap-3 mt-1">
             <h1>{project.name}</h1>
-            <StateBadge state={state} />
+            {paused ? <PausedBadge reason={paused} /> : <StateBadge state={state} />}
           </div>
           <p className="text-muted-foreground text-sm mt-1">
             Checked {timeAgo(status?.checkedAt)} · {project.fe_url || 'No frontend URL'}
@@ -176,7 +177,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
           <h2>Backups</h2>
           <form action={runBackupNow.bind(null, project.slug)}>
             <input type="hidden" name="returnTo" value={`/projects/${project.slug}`} />
-            <Button type="submit" variant="outline" size="sm" disabled={!project.backup?.enabled || !driveConfigured()}>
+            <Button type="submit" variant="outline" size="sm" disabled={!project.backup?.enabled || !driveConfigured() || Boolean(paused)}>
               Run backup now
             </Button>
           </form>
@@ -223,7 +224,7 @@ export default async function ProjectPage({ params, searchParams }: ProjectPageP
                   <Truncate className="font-semibold text-foreground">{i.label}</Truncate>
                   <span className="flex min-w-0 items-center gap-1.5 font-mono text-[13px] text-muted-foreground">
                     <Truncate>{i.key_name} · {maskSecret(i.value_enc)}</Truncate>
-                    <RevealValue slug={project.slug} id={i.id} label={`${i.label} (${i.key_name})`} />
+                    <RevealValue endpoint={`/api/projects/${project.slug}/integrations/${i.id}/reveal`} label={`${i.label} (${i.key_name})`} />
                   </span>
                 </span>
                 <form action={removeIntegration.bind(null, project.slug, i.id)}>

@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { execFile } from 'node:child_process';
-import { getProject, addBackupRun, updateBackupRun, allBackupRuns } from './store';
+import { getProject, addBackupRun, updateBackupRun, allBackupRuns, monitoringEnabled } from './store';
 import { decrypt, encryptBuffer } from './crypto';
 import { driveConfigured, driveNeedsReconnect, ensureFolderPath, uploadBackup, deleteOldBackups } from './drive';
 import { evaluateBackup } from './alerts';
@@ -82,6 +82,9 @@ export interface StartedBackup {
 export function startBackup(slug: string, trigger: BackupTrigger = 'manual'): StartedBackup {
   const project = getProject(slug);
   if (!project) throw new Error('Project not found.');
+  if (!monitoringEnabled(project)) {
+    throw new Error('Paused: this project or its client is inactive. Reactivate to run backups.');
+  }
   if (running.has(slug)) throw new Error('A backup is already running for this project.');
   if (!driveConfigured()) {
     throw new Error('Google Drive is not connected. Connect it in Settings.');
